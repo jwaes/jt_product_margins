@@ -16,10 +16,22 @@ _logger = logging.getLogger(__name__)
 class ProductTemplate(models.Model):
     _inherit = "product.template"
 
+    profit_margin = fields.Float(compute='_compute_profit_margin_template', string='Profit Margin')
     public_pricelist_price = fields.Float(compute='_compute_public_pricelist_template_price', string='Pricelist Price', store=True, digits='Product Price')
     standard_price_max = fields.Float(compute='_compute_standard_price_max', string='Cost (Max)', store=True, digits='Product Price')
     standard_price_avg = fields.Float(compute='_compute_standard_price_max', string='Cost (Avg)', store=True, digits='Product Price')
     
+
+
+    @api.depends('standard_price_max', 'public_pricelist_price')
+    def _compute_profit_margin_template(self):
+        for record in self:
+            if record.standard_price_max > 0.0 :
+                gross_profit = record.public_pricelist_price - record.standard_price_max
+                record.profit_margin = gross_profit / record.public_pricelist_price
+            else :
+                record.profit_margin = 0.0
+
     @api.depends_context('company')
     @api.depends('product_variant_ids', 'product_variant_ids.standard_price')
     def _compute_standard_price_max(self):
