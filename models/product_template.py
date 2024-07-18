@@ -23,7 +23,10 @@ class ProductTemplate(models.Model):
     def _compute_standard_price_max(self):
         for record in self:
             costs = record.product_variant_ids.mapped('standard_price')
-            record.standard_price_max = max(costs)
+            if costs:
+                record.standard_price_max = max(costs)
+            else :
+                record.standard_price_max = 0.0
 
 
     def _compute_public_pricelist_template_price(self):
