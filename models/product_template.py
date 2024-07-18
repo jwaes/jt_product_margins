@@ -26,7 +26,7 @@ class ProductTemplate(models.Model):
     @api.depends('standard_price_max', 'public_pricelist_price')
     def _compute_profit_margin_template(self):
         for record in self:
-            if record.standard_price_max > 0.0 :
+            if record.public_pricelist_price > 0.0 :
                 gross_profit = (record.public_pricelist_price / 2.0) - record.standard_price_max
                 record.profit_margin = gross_profit / record.public_pricelist_price
             else :
