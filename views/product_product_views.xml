@@ -12,4 +12,18 @@
         </field>
     </record>
 
+<record id="product_normal_form_view_inherit" model="ir.ui.view">
+    <field name="name">product.product.view.form.inherit</field>
+    <field name="model">product.product</field>
+    <field name="inherit_id" ref="product.product_normal_form_view"/>
+    <field name="arch" type="xml">
+        <field name="lst_price" position="attributes">
+            <attribute name="attrs">{'readonly': 1}</attribute>
+         </field>   
+         <field name="lst_price" position="after">
+            <field name="public_pricelist_price"/>
+         </field>
+    </field>
+</record>
+
 </odoo>
