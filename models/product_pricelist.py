@@ -23,7 +23,7 @@ class PricelistItem(models.Model):
                 cost = record.product_id.standard_price
             sales_price = (record.fixed_price / 2.0)
             if (cost > 0.0) and (sales_price > 0.0):
-                gross_profit = sales_price - record.standard_price_max
+                gross_profit = sales_price - cost
                 record.profit_margin = gross_profit / sales_price  
             else:
                 record.profit_margin = 0.0          
