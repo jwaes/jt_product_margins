@@ -10,9 +10,9 @@
             <field name="list_price" position="attributes">
                 <attribute name="attrs">{'readonly': 1}</attribute>
             </field>
-            <field name="list_price" position="after">
+            <!-- <field name="list_price" position="after">
                 <field name="public_pricelist_price" />
-            </field>
+            </field> -->
             <xpath expr="//div[@name='standard_price_uom']" position="after">
                 <label for="standard_price_max" groups="base.group_user" attrs="{'invisible': [('product_variant_count', '=', 1)]}"/>
                 <div name="standard_price_max" groups="base.group_user" attrs="{'invisible': [('product_variant_count', '=', 1)]}" class="o_row">
