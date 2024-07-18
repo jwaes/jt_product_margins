@@ -16,19 +16,26 @@ _logger = logging.getLogger(__name__)
 class ProductTemplate(models.Model):
     _inherit = "product.template"
 
-    profit_margin = fields.Float(compute='_compute_profit_margin_template', string='Profit Margin (est.)', store=True)
+    profit_margin = fields.Float(compute='_compute_profit_margin_template', string='Profit Margin (est.)', store=True, group_operator='avg')
     public_pricelist_price = fields.Float(compute='_compute_public_pricelist_template_price', string='Pricelist Price', store=True, digits='Product Price')
     standard_price_max = fields.Float(compute='_compute_standard_price_max', string='Cost (Max)', store=True, digits='Product Price')
     standard_price_avg = fields.Float(compute='_compute_standard_price_max', string='Cost (Avg)', store=True, digits='Product Price')
     
+
+    def _recalculate_margins(self):
+        for record in self:
+            record._compute_public_pricelist_template_price()
+            record._compute_standard_price_max()
+            record._compute_profit_margin_template()
 
 
     @api.depends('standard_price_max', 'public_pricelist_price')
     def _compute_profit_margin_template(self):
         for record in self:
             if (record.public_pricelist_price > 0.0) and (record.standard_price_max > 0.0) :
-                gross_profit = (record.public_pricelist_price / 2.0) - record.standard_price_max
-                record.profit_margin = gross_profit / record.public_pricelist_price
+                sales_price = (record.public_pricelist_price / 2.0)
+                gross_profit = sales_price - record.standard_price_max
+                record.profit_margin = gross_profit /sales_price
             else :
                 record.profit_margin = 0.0
 

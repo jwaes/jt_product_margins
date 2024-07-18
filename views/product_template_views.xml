@@ -37,7 +37,7 @@
             <field name="list_price" position="after">
                 <field name="public_pricelist_price" widget='monetary' options="{'currency_field': 'currency_id'}" optional="hide" decoration-muted="not sale_ok"/>                
                 <field name="profit_margin" widget='percentage' optional="hide" decoration-muted="not sale_ok"/>
-                <field name="standard_price_max" widget='monetary' options="{'currency_field': 'cost_currency_id', 'field_digits': True}"/>
+                <field name="standard_price_max" widget='monetary' options="{'currency_field': 'cost_currency_id', 'field_digits': True}" optional="hide"/>
             </field>
         </field>
     </record>

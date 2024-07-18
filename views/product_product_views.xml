@@ -19,11 +19,8 @@
         <field name="model">product.product</field>
         <field name="inherit_id" ref="product.product_normal_form_view" />
         <field name="arch" type="xml">
-            <field name="lst_price" position="attributes">
+            <field name="list_price" position="attributes">
                 <attribute name="attrs">{'readonly': 1}</attribute>
-            </field>
-            <field name="lst_price" position="after">
-                <field name="public_pricelist_price" />
             </field>
         </field>
     </record>

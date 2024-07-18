@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="product_product_action_server" model="ir.actions.server">
+        <field name="name">Recalculate Product Margins</field>
+        <field name="model_id" ref="product.model_product_product"/>
+        <field name="binding_model_id" ref="product.model_product_product"/>
+        <field name="state">code</field>
+        <field name="code">action = records._recalculate_margins()</field>
+    </record>
+
+    <record id="product_template_action_server" model="ir.actions.server">
+        <field name="name">Recalculate Template Margins</field>
+        <field name="model_id" ref="product.model_product_template"/>
+        <field name="binding_model_id" ref="product.model_product_template"/>
+        <field name="state">code</field>
+        <field name="code">action = records._recalculate_margins()</field>
+    </record>
+
+</odoo>

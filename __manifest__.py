@@ -21,6 +21,7 @@
 
     # always loaded
     'data': [
+        'data/server_actions.xml',
         # 'security/ir.model.access.csv',
         'views/product_product_views.xml',
         'views/product_template_views.xml',
