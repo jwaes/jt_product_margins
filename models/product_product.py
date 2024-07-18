@@ -16,7 +16,7 @@ class ProductProduct(models.Model):
     _inherit = "product.product"
 
 
-    profit_margin = fields.Float(compute='_compute_profit_margin', string='Profit Margin')
+    profit_margin = fields.Float(compute='_compute_profit_margin', string='Profit Margin (est.)')
     public_pricelist_price = fields.Float(compute='_compute_public_pricelist_price', string='Pricelist Price', store=True, digits='Product Price')
 
     @api.depends_context('pricelist', 'partner', 'quantity', 'uom', 'date', 'no_variant_attributes_price_extra')
@@ -32,7 +32,7 @@ class ProductProduct(models.Model):
     @api.depends('standard_price', 'public_pricelist_price')
     def _compute_profit_margin(self):
         for record in self:
-            if record.standard_price_max > 0.0 :
+            if (record.standard_price_max > 0.0) and (record.public_pricelist_price > 0.0) :
                 gross_profit = record.public_pricelist_price - record.standard_price
                 record.profit_margin = gross_profit / record.public_pricelist_price
             else :
