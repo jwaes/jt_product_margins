@@ -1,6 +1,7 @@
 import logging
 import re
 
+from statistics import mean
 from odoo import api, fields, models, tools, _
 from odoo.exceptions import UserError, ValidationError
 from odoo.osv import expression
@@ -17,16 +18,19 @@ class ProductTemplate(models.Model):
 
     public_pricelist_price = fields.Float(compute='_compute_public_pricelist_template_price', string='Pricelist Price', store=True, digits='Product Price')
     standard_price_max = fields.Float(compute='_compute_standard_price_max', string='Cost (Max)', store=True, digits='Product Price')
+    standard_price_avg = fields.Float(compute='_compute_standard_price_max', string='Cost (Avg)', store=True, digits='Product Price')
     
     @api.depends_context('company')
     @api.depends('product_variant_ids', 'product_variant_ids.standard_price')
     def _compute_standard_price_max(self):
         for record in self:
-            costs = record.product_variant_ids.mapped('standard_price')
+            costs = record.product_variant_ids.filtered(lambda t: t.standard_price > 0.0).mapped('standard_price')
             if costs:
                 record.standard_price_max = max(costs)
+                record.standard_price_max = mean(costs)
             else :
                 record.standard_price_max = 0.0
+                record.standard_price_avg = 0.0
 
 
     def _compute_public_pricelist_template_price(self):
