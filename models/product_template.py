@@ -18,8 +18,8 @@ class ProductTemplate(models.Model):
 
     profit_margin = fields.Float(compute='_compute_profit_margin_template', string='Profit Margin (est.)', store=True, group_operator='avg')
     public_pricelist_price = fields.Float(compute='_compute_public_pricelist_template_price', string='Pricelist Price', store=True, digits='Product Price')
-    standard_price_max = fields.Float(compute='_compute_standard_price_max', string='Cost (Max)', store=True, digits='Product Price')
-    standard_price_avg = fields.Float(compute='_compute_standard_price_max', string='Cost (Avg)', store=True, digits='Product Price')
+    standard_price_max = fields.Float(compute='_compute_standard_price_max', string='Cost (max)', store=True, digits='Product Price')
+    standard_price_avg = fields.Float(compute='_compute_standard_price_max', string='Cost (avg)', store=True, digits='Product Price')
     
 
     def _recalculate_margins(self):
@@ -54,8 +54,6 @@ class ProductTemplate(models.Model):
 
     def _compute_public_pricelist_template_price(self):
         default_pricelist = self.env['product.pricelist.item']._default_pricelist_id()
-        _logger.info("public pricelist is %s", default_pricelist.name)
         for tmpl in self:
             price = tmpl.with_context(pricelist=default_pricelist.id).price
-            _logger.info("found price %s", price)
             tmpl.public_pricelist_price = price
