@@ -7,6 +7,7 @@
         <field name="inherit_id" ref="product.product_product_tree_view"/>
         <field name="arch" type="xml">
             <field name="lst_price" position="after">
+                <field name="sale_ok" invisible="1"/>
                 <field name="public_pricelist_price" optional="hide" decoration-muted="not sale_ok"/>
             </field>
         </field>
