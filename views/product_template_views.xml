@@ -14,8 +14,9 @@
                 <field name="public_pricelist_price" />
             </field>
             <xpath expr="//div[@name='standard_price_uom']" position="after">
-                <label for="standard_price_max" groups="base.group_user" attrs="{'invisible': [('product_variant_count', '=', 1)]}"/>
+                <label for="standard_price_max" groups="base.group_user" attrs="{'invisible': [('product_variant_count', '=', 1)]}" string="Cost avg/max" />
                 <div name="standard_price_max" groups="base.group_user" attrs="{'invisible': [('product_variant_count', '=', 1)]}" class="o_row">
+                    <field name="standard_price_avg" widget='monetary' options="{'currency_field': 'cost_currency_id', 'field_digits': True}"/> / 
                     <field name="standard_price_max" widget='monetary' options="{'currency_field': 'cost_currency_id', 'field_digits': True}"/>
                     <span groups="uom.group_uom" class="oe_read_only">per
                         <field name="uom_name"/>

@@ -27,7 +27,7 @@ class ProductTemplate(models.Model):
             costs = record.product_variant_ids.filtered(lambda t: t.standard_price > 0.0).mapped('standard_price')
             if costs:
                 record.standard_price_max = max(costs)
-                record.standard_price_max = mean(costs)
+                record.standard_price_avg = mean(costs)
             else :
                 record.standard_price_max = 0.0
                 record.standard_price_avg = 0.0
