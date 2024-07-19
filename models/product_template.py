@@ -58,6 +58,15 @@ class ProductTemplate(models.Model):
             price = tmpl.with_context(pricelist=default_pricelist.id).price
             tmpl.public_pricelist_price = price
 
+    def _get_q_year(self, for_date=fields.Datetime.now()):
+        value = for_date.year
+        return int(value)
+    
+    def _get_q(self, for_date=Fields.Datetime.now()):
+        value = for_date.month / 3
+        value = math.ceil(value)
+        return int(value)
+
     def create_new_pricelist_item(self, profit_margin=0.4, multiplier=2.0, quarter='next', force_create=False, pricelist=False):
         if not pricelist:
             pricelist = self.env['product.pricelist.item']._default_pricelist_id()
@@ -95,11 +104,3 @@ class ProductTemplate(models.Model):
                         'daterange_q_year': q_year,
                     })
 
-    def _get_q_year(self, for_date=fields.Datetime.now()):
-        value = for_date.year
-        return int(value)
-    
-    def _get_q(self, for_date=Fields.Datetime.now()):
-        value = for_date.month / 3
-        value = math.ceil(value)
-        return int(value)
