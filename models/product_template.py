@@ -62,7 +62,7 @@ class ProductTemplate(models.Model):
         value = for_date.year
         return int(value)
     
-    def _get_q(self, for_date=Fields.Datetime.now()):
+    def _get_q(self, for_date=fields.Datetime.now()):
         value = for_date.month / 3
         value = math.ceil(value)
         return int(value)
