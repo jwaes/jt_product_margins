@@ -1,5 +1,6 @@
 import logging
 import re
+import math
 
 from statistics import mean
 from odoo import api, fields, models, tools, _
