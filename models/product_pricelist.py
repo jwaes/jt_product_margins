@@ -16,7 +16,7 @@ class PricelistItem(models.Model):
         ('current', 'Current'),
         ('past', 'Past'),
         ('future', 'Future')
-    ], string='Validity', compute='_compute_validity')
+    ], string='Validity', compute='_compute_validity', store=True)
 
     @api.depends('date_start', 'date_end')
     def _compute_validity(self):
