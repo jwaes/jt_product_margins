@@ -12,7 +12,7 @@
                 <field name="daterange_q_year" optional="hide" />
                 <field name="validity" optional="hide"
                     decoration-success="validity == 'current'"
-                    decoration-muted="validity == 'past" 
+                    decoration-muted="validity == 'past'" 
                     decoration-info="validity == 'future'"
                     widget="badge"/>
             </field>
