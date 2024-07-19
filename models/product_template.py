@@ -57,3 +57,49 @@ class ProductTemplate(models.Model):
         for tmpl in self:
             price = tmpl.with_context(pricelist=default_pricelist.id).price
             tmpl.public_pricelist_price = price
+
+    def create_new_pricelist_item(self, profit_margin=0.4, multiplier=2.0, quarter='next', force_create=False, pricelist=False):
+        if not pricelist:
+            pricelist = self.env['product.pricelist.item']._default_pricelist_id()
+        # quarter == 'this'
+        q = self._get_q()
+        q_year = self._get_q_year()
+        if quarter == 'next':
+            today = fields.Datetime.now()            
+            for_date = tools.date_utils.add(today, months=3)
+            q = self._get_q(for_date=for_date)
+            q_year = self._get_q_year(for_date=for_date)    
+
+        for template in self:
+            pricelist_items = template.env['product.pricelist.item'].search([
+                '|', ('product_tmpl_id', '=', template.id), 
+                ('product_id', 'in', template.product_variant_ids.ids)]).filtered(lambda price: 
+                    (price.daterange_type == 'quarter') and 
+                    (price.daterange_q == q) and 
+                    (price.daterange_q_year == q_year))
+            if len(pricelist_items) > 0:
+                _logger.info("pricelist item exits for this quarter")
+            else:
+                if template.standard_price_max > 0:
+                    sales_price = (template.standard_price_max / (1-profit_margin)) * multiplier
+                    pricelist_item = template.env['product.pricelist.item'].create({
+                        'pricelist_id': pricelist.id,
+                        'applied_on': '1_product',
+                        'product_tmpl_id': template.id,
+                        'compute_price': 'fixed',
+                        'fixed_price': sales_price,                        
+                        'base': 'list_price',  # based on public price
+                        'min_quantity': 0.0, 
+                        'daterange_type': 'quarter',
+                        'daterange_q': q,
+                        'daterange_q_year': q_year,
+                    })
+
+    def _get_q_year(self, for_date=fields.Datetime.now()):
+        value = for_date.year
+        return int(value)
+    
+    def _get_q(self, for_date=Fields.Datetime.now()):
+        value = for_date.month / 3
+        value = math.ceil(value)
+        return int(value)

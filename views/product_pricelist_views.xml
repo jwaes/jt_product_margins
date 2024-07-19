@@ -10,7 +10,11 @@
                 <field name="daterange_type" optional="hide" />
                 <field name="daterange_q" optional="hide" />
                 <field name="daterange_q_year" optional="hide" />
-                <field name="validity" optional="hide" />
+                <field name="validity" optional="hide"
+                    decoration-success="validity == 'current'"
+                    decoration-muted="validity == 'past" 
+                    decoration-info="validity == 'future'"
+                    widget="badge"/>
             </field>
             <field name="fixed_price" position="after">
                 <field name="profit_margin" widget="percentage" />
