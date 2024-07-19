@@ -12,7 +12,24 @@ class PricelistItem(models.Model):
     _inherit = "product.pricelist.item"
 
     profit_margin = fields.Float(compute='_compute_profit_margin', string='Profit Margin (est.)')
-    
+    validity = fields.Selection([
+        ('current', 'Current'),
+        ('past', 'Past'),
+        ('future', 'Future')
+    ], string='Validity', compute='_compute_validity')
+
+    @api.depends('date_start', 'date_end')
+    def _compute_validity(self):
+        now = fields.Datetime.now()
+        for rec in self:
+            validity = 'current'
+            if rec.date_end and (now > rec.date_end):
+                validity = 'past'
+            elif rec.date_start and (now < rec.date_start):
+                validity = 'future'
+            rec.validity = validity
+
+
     @api.depends('product_tmpl_id', 'product_tmpl_id.standard_price_max', 'product_id', 'product_id.standard_price', 'fixed_price')
     def _compute_profit_margin(self):
         for record in self:

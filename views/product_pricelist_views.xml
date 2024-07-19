@@ -4,16 +4,31 @@
     <record id="product_pricelist_item_tree_view_from_product_inherit" model="ir.ui.view">
         <field name="name">product.pricelist.item.view.tree.inherit</field>
         <field name="model">product.pricelist.item</field>
-        <field name="inherit_id" ref="product.product_pricelist_item_tree_view_from_product"/>
+        <field name="inherit_id" ref="product.product_pricelist_item_tree_view_from_product" />
         <field name="arch" type="xml">
             <field name="date_start" position="before">
-                <field name="daterange_type"  optional="hide"/>
-                <field name="daterange_q"  optional="hide"/>
-                <field name="daterange_q_year"  optional="hide"/>                
-            </field> 
+                <field name="daterange_type" optional="hide" />
+                <field name="daterange_q" optional="hide" />
+                <field name="daterange_q_year" optional="hide" />
+                <field name="validity" optional="hide" />
+            </field>
             <field name="fixed_price" position="after">
-                <field name="profit_margin" widget="percentage"/>   
-            </field>       
+                <field name="profit_margin" widget="percentage" />
+            </field>
+        </field>
+    </record>
+
+    <record id="product_pricelist_item_view_search_inherit_margins" model="ir.ui.view">
+        <field name="name">product.pricelist.item.view.search.inherit</field>
+        <field name="model">product.pricelist.item</field>
+        <field name="inherit_id" ref="product.product_pricelist_item_view_search" />
+        <field name="arch" type="xml">
+            <filter name="pricelist_id" position="before">
+                <filter name="past" string="Past" domain="[('validity', '=', 'past')]" />
+                <filter name="current" string="Current" domain="[('validity', '=', 'current')]" />
+                <filter name="future" string="Future" domain="[('validity', '=', 'future')]" />
+                <separator />
+            </filter>
         </field>
     </record>
 
