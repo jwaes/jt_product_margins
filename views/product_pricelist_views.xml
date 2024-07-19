@@ -23,11 +23,11 @@
         <field name="model">product.pricelist.item</field>
         <field name="inherit_id" ref="product.product_pricelist_item_view_search" />
         <field name="arch" type="xml">
-            <filter name="pricelist_id" position="before">
+            <filter name="Variant Rule" position="after">
+                <separator />
                 <filter name="past" string="Past" domain="[('validity', '=', 'past')]" />
                 <filter name="current" string="Current" domain="[('validity', '=', 'current')]" />
                 <filter name="future" string="Future" domain="[('validity', '=', 'future')]" />
-                <separator />
             </filter>
         </field>
     </record>
