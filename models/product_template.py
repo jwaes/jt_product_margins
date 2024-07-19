@@ -104,5 +104,4 @@ class ProductTemplate(models.Model):
                         'daterange_q': q,
                         'daterange_q_year': q_year,
                     })
-                    # pricelist_item._calculate_daterange()
 
