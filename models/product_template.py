@@ -68,7 +68,7 @@ class ProductTemplate(models.Model):
         value = math.ceil(value)
         return int(value)
 
-    def create_new_pricelist_item(self, profit_margin=0.4, multiplier=2.0, quarter='next', force_create=False, pricelist=False):
+    def create_new_pricelist_item(self, profit_margin=0.4, multiplier=2.0, quarter='next', force_create=False, pricelist=False, reduce_price=False):
         if not pricelist:
             pricelist = self.env['product.pricelist.item']._default_pricelist_id()
         # quarter == 'this'
@@ -81,6 +81,7 @@ class ProductTemplate(models.Model):
             q_year = self._get_q_year(for_date=for_date)    
 
         for template in self:
+            _logger.info("Product Template %s", template.name)
             pricelist_items = template.env['product.pricelist.item'].search([
                 '|', ('product_tmpl_id', '=', template.id), 
                 ('product_id', 'in', template.product_variant_ids.ids)]).filtered(lambda price: 
@@ -92,6 +93,12 @@ class ProductTemplate(models.Model):
             else:
                 if template.standard_price_max > 0:
                     sales_price = (template.standard_price_max / (1-profit_margin)) * multiplier
+                    _logger.info("calculated price is %s", sales_price)
+                    if sales_price < template.public_pricelist_price:
+                        _logger.info("calculated price is lower than current pricelist price")
+                        if not reduce_price:
+                            _logger.info("not lowering price")
+                            sales_price = template.public_pricelist_price
                     pricelist_item = template.env['product.pricelist.item'].create({
                         'pricelist_id': pricelist.id,
                         'applied_on': '1_product',
