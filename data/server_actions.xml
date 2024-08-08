@@ -19,6 +19,7 @@
 
     <record id="product_template_action_price_server" model="ir.actions.server">
         <field name="name">Create Template pricelist item</field>
+        <field name="groups_id" eval="[(4, ref('group_product_pricelist'))]"/>
         <field name="model_id" ref="product.model_product_template"/>
         <field name="binding_model_id" ref="product.model_product_template"/>
         <field name="state">code</field>

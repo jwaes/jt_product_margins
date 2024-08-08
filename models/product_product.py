@@ -10,8 +10,6 @@ from odoo.tools import float_compare, float_round
 
 _logger = logging.getLogger(__name__)
 
-
-
 class ProductProduct(models.Model):
     _inherit = "product.product"
 
@@ -23,7 +21,8 @@ class ProductProduct(models.Model):
     def _compute_public_pricelist_price(self):
         default_pricelist = self.env['product.pricelist.item']._default_pricelist_id()
         for prod in self:
-            price = prod.with_context(pricelist=default_pricelist.id).price
+            # price = prod.with_context(pricelist=default_pricelist.id).price
+            price = default_pricelist._get_product_price(prod, 1.0)
             prod.public_pricelist_price = price
 
 
