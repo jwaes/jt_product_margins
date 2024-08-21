@@ -56,7 +56,7 @@ class ProductTemplate(models.Model):
     def _compute_public_pricelist_template_price(self):
         default_pricelist = self.env['product.pricelist.item']._default_pricelist_id()
         for tmpl in self:
-            price = tmpl.with_context(pricelist=default_pricelist.id).price
+            price = default_pricelist._get_product_price(tmpl, 1.0)
             tmpl.public_pricelist_price = price
 
     def _get_q_year(self, for_date=fields.Datetime.now()):
