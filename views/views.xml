@@ -1,5 +1,7 @@
 <odoo>
   <data>
+
+  
     <!-- explicit list view definition -->
 <!--
     <record model="ir.ui.view" id="jt_product_margins.list">

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Tree view for pricelist items -->
+    <record id="view_product_pricelist_item_tree_custom" model="ir.ui.view">
+        <field name="name">product.pricelist.item.tree.custom</field>
+        <field name="model">product.pricelist.item</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="pricelist_id"/>
+                <field name="applied_on"/>
+                <field name="product_tmpl_id"/>
+                <field name="product_id"/>
+                <field name="min_quantity"/>
+                <field name="fixed_price"/>
+                <field name="percent_price"/>
+                <field name="date_start"/>
+                <field name="date_end"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form view for pricelist items -->
+    <record id="view_product_pricelist_item_form_custom" model="ir.ui.view">
+        <field name="name">product.pricelist.item.form.custom</field>
+        <field name="model">product.pricelist.item</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="pricelist_id"/>
+                        <field name="applied_on"/>
+                        <field name="product_tmpl_id"/>
+                        <field name="product_id"/>
+                        <field name="min_quantity"/>
+                        <field name="fixed_price"/>
+                        <field name="percent_price"/>
+                        <field name="date_start"/>
+                        <field name="date_end"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_product_pricelist_item_custom" model="ir.actions.act_window">
+        <field name="name">Pricelist Items</field>
+        <field name="res_model">product.pricelist.item</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="view_product_pricelist_item_tree_custom"/>
+    </record>
+    
+
+    <menuitem
+        id="menu_product_pricelist_item_custom"
+        name="Pricelist Items"
+        parent="product.menu_products"
+        action="action_product_pricelist_item_custom"
+        sequence="50"
+    />
+
+</odoo>

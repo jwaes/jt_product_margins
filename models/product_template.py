@@ -68,17 +68,18 @@ class ProductTemplate(models.Model):
         value = math.ceil(value)
         return int(value)
 
-    def create_new_pricelist_item(self, profit_margin=0.4, multiplier=2.0, quarter='next', force_create=False, pricelist=False, reduce_price=False):
+    def create_new_pricelist_item(self, profit_margin=0.415, multiplier=2.0, quarter='this', force_create=False, pricelist=False, reduce_price=False):
         if not pricelist:
             pricelist = self.env['product.pricelist.item']._default_pricelist_id()
         # quarter == 'this'
         q = self._get_q()
         q_year = self._get_q_year()
+
         if quarter == 'next':
             today = fields.Datetime.now()            
             for_date = tools.date_utils.add(today, months=3)
             q = self._get_q(for_date=for_date)
-            q_year = self._get_q_year(for_date=for_date)    
+            q_year = self._get_q_year(for_date=for_date)
 
         for template in self:
             _logger.info("Product Template %s", template.name)
