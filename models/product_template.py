@@ -73,7 +73,7 @@ class ProductTemplate(models.Model):
             pricelist = self.env['product.pricelist.item']._default_pricelist_id()
 
         today = fields.Datetime.now()
-        previous_date =  tools.date_utils.tools.date_utils(today, months=3)        
+        previous_date =  tools.date_utils.subtract(today, months=3)        
 
         # quarter == 'this'
         q = self._get_q()
