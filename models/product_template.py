@@ -68,12 +68,16 @@ class ProductTemplate(models.Model):
         value = math.ceil(value)
         return int(value)
 
-    def create_new_pricelist_item(self, profit_margin=0.415, multiplier=2.0, quarter='this', force_create=False, pricelist=False, reduce_price=False):
+    def create_new_pricelist_item(self, profit_margin=False, multiplier=2.0, quarter='this', force_create=False, pricelist=False, reduce_price=False):
         if not pricelist:
             pricelist = self.env['product.pricelist.item']._default_pricelist_id()
         # quarter == 'this'
         q = self._get_q()
         q_year = self._get_q_year()
+
+        if not profit_margin:
+            default_digest_emails = self.env['ir.config_parameter'].sudo().get_param('digest.default_digest_emails')
+            profit_margin = float(self.env['ir.config_parameter'].sudo().get_param('jt.product.margin.pct', default=0.4))
 
         if quarter == 'next':
             today = fields.Datetime.now()            
