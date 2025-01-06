@@ -39,7 +39,7 @@
     <menuitem
         id="menu_product_pricelist_item_custom"
         name="Pricelist Items"
-        parent="product.menu_products"
+        parent="sale.product_menu_catalog"
         action="action_product_pricelist_item_custom"
         sequence="50"
     />
