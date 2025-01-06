@@ -71,6 +71,10 @@ class ProductTemplate(models.Model):
     def create_new_pricelist_item(self, profit_margin=False, multiplier=2.0, quarter='this', force_create=False, pricelist=False, reduce_price=False):
         if not pricelist:
             pricelist = self.env['product.pricelist.item']._default_pricelist_id()
+
+        today = fields.Datetime.now()
+        previous_date =  tools.date_utils.tools.date_utils(today, months=3)        
+
         # quarter == 'this'
         q = self._get_q()
         q_year = self._get_q_year()
@@ -80,8 +84,8 @@ class ProductTemplate(models.Model):
             profit_margin = float(self.env['ir.config_parameter'].sudo().get_param('jt.product.margin.pct', default=0.4))
 
         if quarter == 'next':
-            today = fields.Datetime.now()            
             for_date = tools.date_utils.add(today, months=3)
+            previous_date =  today
             q = self._get_q(for_date=for_date)
             q_year = self._get_q_year(for_date=for_date)
 
@@ -98,12 +102,13 @@ class ProductTemplate(models.Model):
             else:
                 if template.standard_price_max > 0:
                     sales_price = (template.standard_price_max / (1-profit_margin)) * multiplier
+                    previous_price = pricelist_get_product_price(template, 1.0, date=previous_date)
                     _logger.info("calculated price is %s", sales_price)
-                    if sales_price < template.public_pricelist_price:
+                    if sales_price < previous_price:
                         _logger.info("calculated price is lower than current pricelist price")
                         if not reduce_price:
                             _logger.info("not lowering price")
-                            sales_price = template.public_pricelist_price
+                            sales_price = previous_price
                     pricelist_item = template.env['product.pricelist.item'].create({
                         'pricelist_id': pricelist.id,
                         'applied_on': '1_product',
@@ -116,4 +121,5 @@ class ProductTemplate(models.Model):
                         'daterange_q': q,
                         'daterange_q_year': q_year,
                     })
+                    pricelist_item._calculate_daterange()
 

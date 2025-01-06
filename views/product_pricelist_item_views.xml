@@ -11,13 +11,13 @@
                 <field name="applied_on"/>
                 <field name="product_tmpl_id"/>
                 <field name="product_id"/>
-                <field name="min_quantity"/>
+                <field name="min_quantity" optional="hide"/>
                 <field name="fixed_price"/>
-                <field name="percent_price"/>
-                <field name="daterange_type" optional="hide" />
-                <field name="daterange_q" optional="hide" />
-                <field name="daterange_q_year" optional="hide" />
-                <field name="validity" optional="hide"
+                <field name="percent_price" optional="hide"/>
+                <field name="daterange_type"  />
+                <field name="daterange_q" />
+                <field name="daterange_q_year"  />
+                <field name="validity" 
                     decoration-success="validity == 'current'"
                     decoration-muted="validity == 'past'" 
                     decoration-info="validity == 'future'"
