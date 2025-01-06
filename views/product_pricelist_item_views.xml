@@ -6,6 +6,7 @@
         <field name="model">product.pricelist.item</field>
         <field name="arch" type="xml">
             <tree>
+                <field name="company_id" invisible="1"/>
                 <field name="pricelist_id"/>
                 <field name="applied_on"/>
                 <field name="product_tmpl_id"/>
@@ -13,39 +14,24 @@
                 <field name="min_quantity"/>
                 <field name="fixed_price"/>
                 <field name="percent_price"/>
+                <field name="daterange_type" optional="hide" />
+                <field name="daterange_q" optional="hide" />
+                <field name="daterange_q_year" optional="hide" />
+                <field name="validity" optional="hide"
+                    decoration-success="validity == 'current'"
+                    decoration-muted="validity == 'past'" 
+                    decoration-info="validity == 'future'"
+                    widget="badge"/>                        
                 <field name="date_start"/>
                 <field name="date_end"/>
             </tree>
         </field>
     </record>
 
-    <!-- Form view for pricelist items -->
-    <record id="view_product_pricelist_item_form_custom" model="ir.ui.view">
-        <field name="name">product.pricelist.item.form.custom</field>
-        <field name="model">product.pricelist.item</field>
-        <field name="arch" type="xml">
-            <form>
-                <sheet>
-                    <group>
-                        <field name="pricelist_id"/>
-                        <field name="applied_on"/>
-                        <field name="product_tmpl_id"/>
-                        <field name="product_id"/>
-                        <field name="min_quantity"/>
-                        <field name="fixed_price"/>
-                        <field name="percent_price"/>
-                        <field name="date_start"/>
-                        <field name="date_end"/>
-                    </group>
-                </sheet>
-            </form>
-        </field>
-    </record>
-
     <record id="action_product_pricelist_item_custom" model="ir.actions.act_window">
         <field name="name">Pricelist Items</field>
         <field name="res_model">product.pricelist.item</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">tree</field>
         <field name="view_id" ref="view_product_pricelist_item_tree_custom"/>
     </record>
     
