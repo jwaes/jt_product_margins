@@ -102,7 +102,7 @@ class ProductTemplate(models.Model):
             else:
                 if template.standard_price_max > 0:
                     sales_price = (template.standard_price_max / (1-profit_margin)) * multiplier
-                    previous_price = pricelist_get_product_price(template, 1.0, date=previous_date)
+                    previous_price = pricelist._get_product_price(template, 1.0, date=previous_date)
                     _logger.info("calculated price is %s", sales_price)
                     if sales_price < previous_price:
                         _logger.info("calculated price is lower than current pricelist price")
