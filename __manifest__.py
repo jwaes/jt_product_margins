@@ -17,7 +17,7 @@
     'version': '2.8',
 
     # any module necessary for this one to work correctly
-    'depends': ['base','product','jt_pricelist_publisher' ,'jt.property.key'],
+    'depends': ['base', 'product', 'jt_pricelist_publisher' ,'jt_product_properties'],
 
     # always loaded
     'data': [
