@@ -68,6 +68,16 @@ class ProductTemplate(models.Model):
         value = math.ceil(value)
         return int(value)
 
+
+    @api.depends('tmpl_all_kvs')
+    def _get_profit_margin(self):
+        profit_margin = float(self.env['ir.config_parameter'].sudo().get_param('jt.product.margin.pct', default=0.4))
+        for tmpl in self:
+            for kv in tmpl.tmpl_all_kvs:
+                if kv.code == "margin.bruto.pct":
+                    profit_margin = float(kv.text)
+        return profit_margin        
+
     def create_new_pricelist_item(self, profit_margin=False, multiplier=2.0, quarter='this', force_create=False, pricelist=False, reduce_price=False):
         if not pricelist:
             pricelist = self.env['product.pricelist.item']._default_pricelist_id()
@@ -80,8 +90,7 @@ class ProductTemplate(models.Model):
         q_year = self._get_q_year()
 
         if not profit_margin:
-            default_digest_emails = self.env['ir.config_parameter'].sudo().get_param('digest.default_digest_emails')
-            profit_margin = float(self.env['ir.config_parameter'].sudo().get_param('jt.product.margin.pct', default=0.4))
+            profit_margin = self._get_profit_margin()
 
         if quarter == 'next':
             for_date = tools.date_utils.add(today, months=3)
@@ -96,7 +105,7 @@ class ProductTemplate(models.Model):
                 ('product_id', 'in', template.product_variant_ids.ids)]).filtered(lambda price: 
                     (price.daterange_type == 'quarter') and 
                     (price.daterange_q == q) and 
-                    (price.daterange_q_year == q_year))
+                    (price.daterange_q_year == q_year))   
             if len(pricelist_items) > 0:
                 _logger.info("pricelist item exits for this quarter")
             else:
