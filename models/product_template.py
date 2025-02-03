@@ -17,7 +17,7 @@ _logger = logging.getLogger(__name__)
 class ProductTemplate(models.Model):
     _inherit = "product.template"
 
-    profit_margin = fields.Float(compute='_compute_profit_margin_template', string='Profit Margin (est.)', store=True, group_operator='avg')
+    profit_margin = fields.Float(compute='_compute_profit_margin_template', string='Profit Margin (est.)', store=True, aggregator='avg')
     public_pricelist_price = fields.Float(compute='_compute_public_pricelist_template_price', string='Pricelist Price', store=True, digits='Product Price')
     standard_price_max = fields.Float(compute='_compute_standard_price_max', string='Cost (max)', store=True, digits='Product Price')
     standard_price_avg = fields.Float(compute='_compute_standard_price_max', string='Cost (avg)', store=True, digits='Product Price')

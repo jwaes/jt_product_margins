@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- Tree view for pricelist items -->
+    <!-- List view for pricelist items -->
     <record id="view_product_pricelist_item_tree_custom" model="ir.ui.view">
         <field name="name">product.pricelist.item.tree.custom</field>
         <field name="model">product.pricelist.item</field>
-        <field name="arch" type="xml">
-            <tree>
+        <field name="arch" type="xml"> list<
                 <field name="company_id" invisible="1"/>
                 <field name="pricelist_id"/>
                 <field name="applied_on"/>
@@ -23,15 +22,14 @@
                     decoration-info="validity == 'future'"
                     widget="badge"/>                        
                 <field name="date_start"/>
-                <field name="date_end"/>
-            </tree>
+                <field name="date_end"/><list/
         </field>
     </record>
 
     <record id="action_product_pricelist_item_custom" model="ir.actions.act_window">
         <field name="name">Pricelist Items</field>
         <field name="res_model">product.pricelist.item</field>
-        <field name="view_mode">tree</field>
+        <field name="view_mode">list</field>
         <field name="view_id" ref="view_product_pricelist_item_tree_custom"/>
     </record>
     

@@ -14,7 +14,7 @@ class ProductProduct(models.Model):
     _inherit = "product.product"
 
 
-    profit_margin = fields.Float(compute='_compute_profit_margin', string='Profit Margin (est.)', store=True,  group_operator='avg')
+    profit_margin = fields.Float(compute='_compute_profit_margin', string='Profit Margin (est.)', store=True,  aggregator='avg')
     public_pricelist_price = fields.Float(compute='_compute_public_pricelist_price', string='Pricelist Price', store=True, digits='Product Price')
 
     @api.depends_context('pricelist', 'partner', 'quantity', 'uom', 'date', 'no_variant_attributes_price_extra')
