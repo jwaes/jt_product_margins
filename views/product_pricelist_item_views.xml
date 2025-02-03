@@ -4,7 +4,8 @@
     <record id="view_product_pricelist_item_tree_custom" model="ir.ui.view">
         <field name="name">product.pricelist.item.tree.custom</field>
         <field name="model">product.pricelist.item</field>
-        <field name="arch" type="xml"> list<
+        <field name="arch" type="xml">
+            <list string="Pricelist items">
                 <field name="company_id" invisible="1"/>
                 <field name="pricelist_id"/>
                 <field name="applied_on"/>
@@ -22,7 +23,8 @@
                     decoration-info="validity == 'future'"
                     widget="badge"/>                        
                 <field name="date_start"/>
-                <field name="date_end"/><list/
+                <field name="date_end"/>
+            </list>
         </field>
     </record>
 
