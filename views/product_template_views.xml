@@ -8,7 +8,7 @@
         <field name="inherit_id" ref="product.product_template_form_view" />
         <field name="arch" type="xml">
             <field name="list_price" position="attributes">
-                <attribute name="readonly">true</attribute>
+                <attribute name="readonly">1</attribute>
             </field>
             <div name="list_price_uom" position="after">
                 <label for="public_pricelist_price" />
