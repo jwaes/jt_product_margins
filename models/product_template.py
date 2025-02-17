@@ -99,36 +99,40 @@ class ProductTemplate(models.Model):
             q_year = self._get_q_year(for_date=for_date)
 
         for template in self:
-            _logger.info("Product Template %s", template.name)
-            pricelist_items = template.env['product.pricelist.item'].search([
-                '|', ('product_tmpl_id', '=', template.id), 
-                ('product_id', 'in', template.product_variant_ids.ids)]).filtered(lambda price: 
-                    (price.daterange_type == 'quarter') and 
-                    (price.daterange_q == q) and 
-                    (price.daterange_q_year == q_year))   
-            if len(pricelist_items) > 0:
-                _logger.info("pricelist item exits for this quarter")
-            else:
-                if template.standard_price_max > 0:
-                    sales_price = (template.standard_price_max / (1-profit_margin)) * multiplier
-                    previous_price = pricelist._get_product_price(template, 1.0, date=previous_date)
-                    _logger.info("calculated price is %s", sales_price)
-                    if sales_price < previous_price:
-                        _logger.info("calculated price is lower than current pricelist price")
-                        if not reduce_price:
-                            _logger.info("not lowering price")
-                            sales_price = previous_price
-                    pricelist_item = template.env['product.pricelist.item'].create({
-                        'pricelist_id': pricelist.id,
-                        'applied_on': '1_product',
-                        'product_tmpl_id': template.id,
-                        'compute_price': 'fixed',
-                        'fixed_price': sales_price,                        
-                        'base': 'list_price',  # based on public price
-                        'min_quantity': 0.0, 
-                        'daterange_type': 'quarter',
-                        'daterange_q': q,
-                        'daterange_q_year': q_year,
-                    })
-                    pricelist_item._calculate_daterange()
-
+            for variant in template.product_variant_ids:
+                _logger.info("Product Template %s, Variant %s", template.name, variant.name)
+                pricelist_items = template.env['product.pricelist.item'].search([
+                    ('product_id', '=', variant.id),
+                    ('daterange_type', '=', 'quarter'),
+                    ('daterange_q', '=', q),
+                    ('daterange_q_year', '=', q_year),
+                ])
+                if len(pricelist_items) > 0:
+                    _logger.info("pricelist item exits for this quarter")
+                else:
+                    if template.standard_price_max > 0:
+                        sales_price = (template.standard_price_max / (1-profit_margin)) * multiplier
+                        previous_price = pricelist._get_product_price(variant, 1.0, date=previous_date)
+                        _logger.info("calculated price is %s", sales_price)
+                        calculated_price = sales_price # Store the calculated price
+                        if sales_price < previous_price:
+                            _logger.info("calculated price is lower than current pricelist price")
+                            if not reduce_price:
+                                _logger.info("not lowering price")
+                                sales_price = previous_price
+                        pricelist_item = template.env['product.pricelist.item'].create({
+                            'pricelist_id': pricelist.id,
+                            'applied_on': '1_product',
+                            'product_id': variant.id,
+                            'product_tmpl_id': template.id,
+                            'compute_price': 'fixed',
+                            'fixed_price': sales_price,
+                            'fixed_price_automatically_calculated': calculated_price,
+                            'base': 'list_price',  # based on public price
+                            'min_quantity': 0.0,
+                            'daterange_type': 'quarter',
+                            'daterange_q': q,
+                            'daterange_q_year': q_year,
+                            'automatically_generated': True,
+                        })
+                        pricelist_item._calculate_daterange()

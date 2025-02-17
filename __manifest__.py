@@ -17,7 +17,7 @@
     'version': '18.0.1.0.0',
 
     # any module necessary for this one to work correctly
-    'depends': ['base', 'product', 'jt_pricelist_publisher' ,'jt_product_properties'],
+    'depends': ['base', 'product', 'jt_pricelist_quarterly' ,'jt_product_properties'],
 
     # always loaded
     'data': [
@@ -29,4 +29,3 @@
         'views/product_template_views.xml',
     ],
 }
-

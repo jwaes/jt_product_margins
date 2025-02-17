@@ -17,6 +17,8 @@ class PricelistItem(models.Model):
         ('past', 'Past'),
         ('future', 'Future')
     ], string='Validity', compute='_compute_validity', store=True)
+    automatically_generated = fields.Boolean(string='Automatically Generated', default=False)
+    fixed_price_automatically_calculated = fields.Float(string='Calculated Price', digits='Product Price')
 
     @api.depends('date_start', 'date_end')
     def _compute_validity(self):
@@ -43,4 +45,4 @@ class PricelistItem(models.Model):
                 gross_profit = sales_price - cost
                 record.profit_margin = gross_profit / sales_price  
             else:
-                record.profit_margin = 0.0          
+                record.profit_margin = 0.0
