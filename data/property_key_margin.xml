@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Margin Template Max Cost property key -->
+        <record id="prop_key_margin_cost" model="jt.property.key">
+            <field name="name">Margin Template Max Cost</field>
+            <field name="code">margin.cost.max</field>
+            <field name="property_type">selection</field>
+            <field name="behavior">replace</field>
+        </record>
+        <!-- Property values for Margin Template Max Cost -->
+        <record id="prop_value_margin_cost_yes" model="jt.property.value">
+            <field name="name">yes</field>
+            <field name="code">yes</field>
+            <field name="key_id" ref="prop_key_margin_cost"/>
+        </record>
+        <record id="prop_value_margin_cost_no" model="jt.property.value">
+            <field name="name">no</field>
+            <field name="code">no</field>
+            <field name="key_id" ref="prop_key_margin_cost"/>
+        </record>
+    </data>
+</odoo>

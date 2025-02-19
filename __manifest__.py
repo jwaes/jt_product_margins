@@ -21,6 +21,7 @@
 
     # always loaded
     'data': [
+        'data/property_key_margin.xml',
         'data/server_actions.xml',
         # 'security/ir.model.access.csv',
         'views/product_pricelist_views.xml',
