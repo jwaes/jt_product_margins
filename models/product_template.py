@@ -139,7 +139,7 @@ class ProductTemplate(models.Model):
                             sales_price = previous_price
                     pricelist_item = template.env['product.pricelist.item'].create({
                         'pricelist_id': pricelist.id,
-                        'applied_on': '1_product',
+                        'applied_on': '0_product_variant',
                         'product_id': variant.id,
                         'product_tmpl_id': template.id,
                         'compute_price': 'fixed',

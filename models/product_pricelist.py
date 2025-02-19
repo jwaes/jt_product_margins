@@ -36,10 +36,10 @@ class PricelistItem(models.Model):
     def _compute_profit_margin(self):
         for record in self:
             cost = 0.0
-            if record.product_tmpl_id:
+            if record.product_id and record.product_id.standard_price > 0.0:
+                cost = record.product_id.standard_price            
+            elif record.product_tmpl_id:
                 cost = record.product_tmpl_id.standard_price_max
-            elif record.product_id:
-                cost = record.product_id.standard_price
             sales_price = (record.fixed_price / 2.0)
             if (cost > 0.0) and (sales_price > 0.0):
                 gross_profit = sales_price - cost
