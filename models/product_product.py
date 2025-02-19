@@ -40,4 +40,21 @@ class ProductProduct(models.Model):
     def _recalculate_margins(self):
         for record in self:
             record._compute_public_pricelist_price()
-            record._compute_profit_margin()                       
+            record._compute_profit_margin()           
+
+    def create_pricelist_item_from_template(self, profit_margin=False, multiplier=2.0, quarter='this', force_create=False, pricelist=False, reduce_price=False):
+        """Creates a pricelist item for this product variant based on its parent template.
+        
+        This method calls the parent's create_new_pricelist_item method and then filters the 
+        returned pricelist items to return the one corresponding to this variant.
+        """
+        self.ensure_one()
+        pricelist_items = self.product_tmpl_id.create_new_pricelist_item(
+            profit_margin=profit_margin, 
+            multiplier=multiplier, 
+            quarter=quarter, 
+            force_create=force_create, 
+            pricelist=pricelist, 
+            reduce_price=reduce_price
+        )
+        return pricelist_items.filtered(lambda item: item.product_id == self)                        

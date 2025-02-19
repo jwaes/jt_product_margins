@@ -115,12 +115,15 @@ class ProductTemplate(models.Model):
                         if kv.code == "margin.cost.max":
                             margin_max_cost = (kv.text.lower() == 'yes')
                             break
+                    _logger.info("Margin max cost setting evaluated to: %s", margin_max_cost)
                     if margin_max_cost:
+                        _logger.info("Margin max cost is enabled. Using template cost for margin calculation.")
                         if template.standard_price_max > 0:
                             base_cost = template.standard_price_max
                         else:
                             continue
                     else:
+                        _logger.info("Margin max cost is disabled. Using variant cost for margin calculation.")
                         if variant.standard_price > 0:
                             base_cost = variant.standard_price
                         else:
