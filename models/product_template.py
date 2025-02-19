@@ -113,7 +113,7 @@ class ProductTemplate(models.Model):
                     margin_max_cost = True
                     for kv in template.tmpl_all_kvs:
                         if kv.code == "margin.cost.max":
-                            margin_max_cost = (kv.text.lower() == 'yes')
+                            margin_max_cost = (kv.value_id.code.lower() == 'yes')
                             break
                     _logger.info("Margin max cost setting evaluated to: %s", margin_max_cost)
                     if margin_max_cost:
