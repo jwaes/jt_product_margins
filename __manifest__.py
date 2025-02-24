@@ -23,7 +23,7 @@
     'data': [
         'data/property_key_margin.xml',
         'data/server_actions.xml',
-        # 'security/ir.model.access.csv',
+        'security/ir.model.access.csv',
         'wizard/next_quarter_pricelist_wizard_views.xml',        
         'views/next_quarter_button_view.xml',
         'views/product_pricelist_views.xml',

@@ -1,5 +1,4 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_jt_product_margins_jt_product_margins,jt_product_margins.jt_product_margins,model_jt_product_margins_jt_product_margins,base.group_user,1,1,1,1
 access_next_quarter_wizard,Next Quarter Pricelist Wizard,model_next_quarter_pricelist_wizard,base.group_user,1,0,0,0
 access_next_quarter_wizard_manager,Next Quarter Pricelist Wizard,model_next_quarter_pricelist_wizard,product.group_product_manager,1,1,1,1
 access_next_quarter_wizard_line,Next Quarter Pricelist Wizard Line,model_next_quarter_pricelist_wizard_line,base.group_user,1,0,0,0
