@@ -54,16 +54,18 @@ class NextQuarterPricelistWizard(models.TransientModel):
         for item in pricelist_items:
             tmpl = item.product_tmpl_id
             current_price = item.fixed_price
+            previous_price = self.pricelist_id._get_product_price(item.product_id or tmpl, 1.0, date=start_date)
             # Calculate proposed price for next quarter using existing method
-            new_item = tmpl.create_new_pricelist_item(
+
+            proposed_price = tmpl.create_new_pricelist_item(
                 profit_margin=False,
                 multiplier=2.0,
                 quarter='next',
                 force_create=False,
                 pricelist=self.pricelist_id,
-                reduce_price=item.reduce_price
-            )
-            proposed_price = new_item.fixed_price if new_item else current_price
+                reduce_price=item.reduce_price  # Pass the reduce_price flag
+            ).fixed_price
+
             # Determine price change
             if proposed_price > current_price:
                 change = 'up'
@@ -71,6 +73,11 @@ class NextQuarterPricelistWizard(models.TransientModel):
                 change = 'down'
             else:
                 change = 'same'
+
+            # Apply reduce_price logic
+            if proposed_price < previous_price and not item.reduce_price:
+                proposed_price = previous_price
+
             self.env['next.quarter.pricelist.wizard.line'].create({
                 'wizard_id': self.id,
                 'product_tmpl_id': tmpl.id,
