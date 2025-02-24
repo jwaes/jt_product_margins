@@ -24,7 +24,7 @@
         'data/property_key_margin.xml',
         'data/server_actions.xml',
         # 'security/ir.model.access.csv',
-        'views/next_quarter_button_views.xml',
+        'views/next_quarter_button_view.xml',
         'views/product_pricelist_views.xml',
         'views/product_pricelist_item_views.xml',
         'views/product_product_views.xml',
