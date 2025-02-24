@@ -10,7 +10,7 @@
                 </group>
                 <sheet>
                     <field name="line_ids" nolabel="1">
-                        <tree decoration-success="price_change=='up'" decoration-danger="price_change=='down'">
+                        <list decoration-success="price_change=='up'" decoration-danger="price_change=='down'">
                             <field name="product_tmpl_id"/>
                             <field name="current_price"/>
                             <field name="proposed_price"/>
@@ -18,7 +18,7 @@
                             <field name="reduce_price"/>
                             <field name="margin_used"/>
                             <field name="applied_on" string="Price Type"/>
-                        </tree>
+                        </list>
                     </field>
                 </sheet>
                 <footer>
