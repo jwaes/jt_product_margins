@@ -5,7 +5,7 @@
         <field name="inherit_id" ref="product.product_pricelist_view"/>
         <field name="arch" type="xml">
             <xpath expr="//header" position="inside">
-                <button name="%(action_next_quarter_pricelist_wizard)d" string="Next Quarter Pricelist" type="action" class="btn-primary"/>
+                <button name="%(jt_product_margins.action_next_quarter_pricelist_wizard)d" string="Next Quarter Pricelist" type="action" class="btn-primary" context="{'default_pricelist_id': active_id}"/>
             </xpath>
         </field>
     </record>

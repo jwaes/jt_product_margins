@@ -45,10 +45,11 @@ class NextQuarterPricelistWizard(models.TransientModel):
         _logger.info("Current Quarter Dates: %s to %s", start_date, end_date)
         # Find pricelist items automatically generated for current quarter
         pricelist_items = self.env['product.pricelist.item'].search([
-            ('pricelist_id', '=', self.pricelist_id.id),
-            ('date_start', '=', start_date),
-            ('date_end', '=', end_date),
+            ('pricelist_id', '=', self.pricelist_id.id),            
             ('automatically_generated', '=', True),
+            ('daterange_type', '=', 'quarter'),
+            ('daterange_q', '=', current_quarter),
+            ('daterange_q_year', '=', year),
         ])
         for item in pricelist_items:
             tmpl = item.product_tmpl_id
