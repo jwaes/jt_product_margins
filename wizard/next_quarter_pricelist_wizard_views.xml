@@ -1,0 +1,38 @@
+<odoo>
+    <record id="view_next_quarter_pricelist_wizard_form" model="ir.ui.view">
+        <field name="name">next.quarter.pricelist.wizard.form</field>
+        <field name="model">next.quarter.pricelist.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Next Quarter Pricelist Wizard">
+                <group>
+                    <field name="pricelist_id"/>
+                    <button string="Load Data" type="object" name="load_data" class="btn-primary"/>
+                </group>
+                <sheet>
+                    <field name="line_ids" nolabel="1">
+                        <tree decoration-success="price_change=='up'" decoration-danger="price_change=='down'">
+                            <field name="product_tmpl_id"/>
+                            <field name="current_price"/>
+                            <field name="proposed_price"/>
+                            <field name="price_change"/>
+                            <field name="reduce_price"/>
+                            <field name="margin_used"/>
+                            <field name="applied_on" string="Price Type"/>
+                        </tree>
+                    </field>
+                </sheet>
+                <footer>
+                    <button string="Create Next Quarter Items" type="object" name="action_create_next_quarter_items" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_next_quarter_pricelist_wizard" model="ir.actions.act_window">
+        <field name="name">Next Quarter Pricelist Wizard</field>
+        <field name="res_model">next.quarter.pricelist.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

@@ -1,0 +1,12 @@
+<odoo>
+    <record id="view_product_pricelist_form_inherit_next_quarter" model="ir.ui.view">
+        <field name="name">product.pricelist.form.inherit.next.quarter</field>
+        <field name="model">product.pricelist</field>
+        <field name="inherit_id" ref="product.product_pricelist_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="%(action_next_quarter_pricelist_wizard)d" string="Next Quarter Pricelist" type="action" class="btn-primary"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>
