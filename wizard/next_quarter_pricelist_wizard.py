@@ -12,15 +12,16 @@ class NextQuarterPricelistWizardLine(models.TransientModel):
 
     wizard_id = fields.Many2one('next.quarter.pricelist.wizard', string="Wizard")
     product_tmpl_id = fields.Many2one('product.template', string="Product")
+    product_id = fields.Many2one('product.product', string="Variant")
     current_price = fields.Float(string="Current Pricelist Price")
     proposed_price = fields.Float(string="Proposed Price")
-    calculated_price = fields.Float(string="Calculated Price")  # New field
-    new_price = fields.Float(string="New Price") # Added field
+    calculated_price = fields.Float(string="Calculated Price")
+    new_price = fields.Float(string="New Price")
     price_change = fields.Selection([
          ('up', 'Up'),
          ('down', 'Down'),
          ('same', 'Same'),
-    ], string="Price Change")
+    ], string="Price Change", compute='_compute_price_change')
     margin_used = fields.Char(string="Margin Used")
     applied_on = fields.Selection([
         ('template', 'Template'),
@@ -42,6 +43,16 @@ class NextQuarterPricelistWizardLine(models.TransientModel):
                 line.computed_margin = gross_profit / sales_price
             else:
                 line.computed_margin = 0.0
+
+    @api.depends('current_price', 'new_price')
+    def _compute_price_change(self):
+        for line in self:
+            if float_compare(line.new_price, line.current_price, precision_digits=2) > 0:
+                line.price_change = 'up'
+            elif float_compare(line.new_price, line.current_price, precision_digits=2) < 0:
+                line.price_change = 'down'
+            else:
+                line.price_change = 'same'
 
 class NextQuarterPricelistWizard(models.TransientModel):
     _name = 'next.quarter.pricelist.wizard'
@@ -92,22 +103,15 @@ class NextQuarterPricelistWizard(models.TransientModel):
             proposed_price = vals['fixed_price']
             calculated_price = vals['fixed_price_automatically_calculated']
 
-            # Determine price change
-            if float_compare(proposed_price, current_price, precision_digits=2) > 0:
-                change = 'up'
-            elif float_compare(proposed_price, current_price, precision_digits=2) < 0:
-                change = 'down'
-            else:
-                change = 'same'
-
             self.env['next.quarter.pricelist.wizard.line'].create({
                 'wizard_id': self.id,
                 'product_tmpl_id': tmpl.id,
+                'product_id': item.product_id.id,
                 'current_price': current_price,
                 'proposed_price': proposed_price,
                 'calculated_price': calculated_price,
                 'new_price': proposed_price,  # Initialize new_price
-                'price_change': change,
+                'price_change': 'same',
                 'margin_used': str(tmpl._get_profit_margin()),
                 'applied_on': "variant" if item.product_id else "template",
             })
@@ -132,7 +136,6 @@ class NextQuarterPricelistWizard(models.TransientModel):
                     profit_margin=False,
                     multiplier=2.0,
                     quarter='next',
-                    force_create=True,
                     pricelist=self.pricelist_id,
                     reduce_price=False,  # Always False, user chooses on wizard
                     fixed_price=line.new_price
