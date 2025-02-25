@@ -111,13 +111,18 @@ class NextQuarterPricelistWizard(models.TransientModel):
                 target = line.product_tmpl_id
             else:
                 target = line.product_tmpl_id.product_variant_ids[:1]
-            if target:
+                if not target:
+                    continue # Skip if no variant is found.
+
+            if target:  # Check if target exists
                 target.create_new_pricelist_item(
                     profit_margin=False,
                     multiplier=2.0,
                     quarter='next',
+                    force_create=True,
                     pricelist=self.pricelist_id,
-                    reduce_price=False,  # Always False, user chooses on wizard
-                    fixed_price=line.new_price
+                    reduce_price=False,  # Always False
+                    fixed_price=line.new_price,
+                    for_variant=target if line.applied_on == 'variant' else False  # Pass the variant if applicable
                 )
         return {'type': 'ir.actions.act_window_close'}
