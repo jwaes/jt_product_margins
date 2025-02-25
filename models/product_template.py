@@ -147,7 +147,7 @@ class ProductTemplate(models.Model):
             q_year = self._get_q_year(for_date=for_date)
         return q, q_year, previous_date
 
-    def create_new_pricelist_item(self, profit_margin=False, multiplier=2.0, quarter='this', force_create=False, pricelist=False, reduce_price=False):
+    def create_new_pricelist_item(self, profit_margin=False, multiplier=2.0, quarter='this', force_create=False, pricelist=False, reduce_price=False, fixed_price=False):
         if not pricelist:
             pricelist = self.env['product.pricelist.item']._default_pricelist_id()
 
@@ -181,6 +181,9 @@ class ProductTemplate(models.Model):
                         else:
                             continue  # Skip this variant
                     vals = self.get_pricelist_item_vals(template, variant, profit_margin, quarter, multiplier, pricelist, reduce_price)
+                    if fixed_price:
+                        vals['fixed_price'] = fixed_price
                     if vals:
                         pricelist_item = template.env['product.pricelist.item'].create(vals)
                         pricelist_item._calculate_daterange()
+                        

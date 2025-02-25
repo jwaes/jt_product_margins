@@ -13,13 +13,13 @@ class NextQuarterPricelistWizardLine(models.TransientModel):
     product_tmpl_id = fields.Many2one('product.template', string="Product")
     current_price = fields.Float(string="Current Pricelist Price")
     proposed_price = fields.Float(string="Proposed Price")
-    calculated_price = fields.Float(string="Calculated Price")  # New field
+    calculated_price = fields.Float(string="Calculated Price")
+    new_price = fields.Float(string="New Price")  # New field
     price_change = fields.Selection([
          ('up', 'Up'),
          ('down', 'Down'),
          ('same', 'Same'),
     ], string="Price Change")
-    apply_reduction = fields.Boolean(string="Apply Reduction", default=False) # New Field
     margin_used = fields.Char(string="Margin Used")
     applied_on = fields.Char(string="Price Type")
 
@@ -84,8 +84,8 @@ class NextQuarterPricelistWizard(models.TransientModel):
                 'current_price': current_price,
                 'proposed_price': proposed_price,
                 'calculated_price': calculated_price,
+                'new_price': proposed_price,  # Initialize new_price
                 'price_change': change,
-                'apply_reduction': False, #default to false
                 'margin_used': str(tmpl._get_profit_margin()),
                 'applied_on': "Variant" if item.product_id else "Template",
             })
@@ -108,6 +108,7 @@ class NextQuarterPricelistWizard(models.TransientModel):
                 quarter='next',
                 force_create=True,
                 pricelist=self.pricelist_id,
-                reduce_price=line.apply_reduction  # Use the user's choice
+                reduce_price=False,  # Always create with calculated price
+                fixed_price=line.new_price # Pass the new price
             )
         return {'type': 'ir.actions.act_window_close'}
