@@ -86,7 +86,7 @@ class NextQuarterPricelistWizard(models.TransientModel):
                 'calculated_price': calculated_price,
                 'price_change': change,
                 'apply_reduction': False, #default to false
-                'margin_used': tmpl.property_key_margin.name if tmpl.property_key_margin else (tmpl.categ_id.property_key_margin.name if tmpl.categ_id and tmpl.categ_id.property_key_margin else ''),
+                'margin_used': str(tmpl._get_profit_margin()),
                 'applied_on': "Variant" if item.product_id else "Template",
             })
         return {
