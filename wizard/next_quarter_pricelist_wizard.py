@@ -130,7 +130,7 @@ class NextQuarterPricelistWizard(models.TransientModel):
             if line.applied_on == 'template':
                 target = line.product_tmpl_id
             else:
-                target = line.product_tmpl_id.product_variant_ids[:1]
+                target = line.product_id
             if target:
                 target.create_new_pricelist_item(
                     profit_margin=False,
