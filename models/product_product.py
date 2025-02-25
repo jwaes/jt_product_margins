@@ -60,7 +60,7 @@ class ProductProduct(models.Model):
     #     return pricelist_items.filtered(lambda item: item.product_id == self)                        
 
 
-    def create_new_pricelist_item(self, profit_margin=False, multiplier=2.0, quarter='this', force_create=False, pricelist=False, reduce_price=False):
+    def create_new_pricelist_item(self, profit_margin=False, multiplier=2.0, quarter='this', pricelist=False, reduce_price=False, fixed_price=False):
         """
         For a product.product record, forward the call to its parent template’s create_new_pricelist_item method.
         This will create pricelist items for all variants (including siblings) as defined in the product.template method.
@@ -70,7 +70,8 @@ class ProductProduct(models.Model):
             profit_margin=profit_margin,
             multiplier=multiplier,
             quarter=quarter,
-            force_create=force_create,
             pricelist=pricelist,
-            reduce_price=reduce_price
+            reduce_price=reduce_price,
+            fixed_price=fixed_price,
+            for_variant=self,
         )    

@@ -147,7 +147,7 @@ class ProductTemplate(models.Model):
             q_year = self._get_q_year(for_date=for_date)
         return q, q_year, previous_date
 
-    def create_new_pricelist_item(self, profit_margin=False, multiplier=2.0, quarter='this', force_create=False, pricelist=False, reduce_price=False, fixed_price=False):
+    def create_new_pricelist_item(self, profit_margin=False, multiplier=2.0, quarter='this', pricelist=False, reduce_price=False, fixed_price=False, for_variant=False):
         if not pricelist:
             pricelist = self.env['product.pricelist.item']._default_pricelist_id()
 
@@ -155,35 +155,35 @@ class ProductTemplate(models.Model):
 
         for template in self:
             for variant in template.product_variant_ids:
-                _logger.info("Product Template %s, Variant %s", template.name, variant.name)
-                pricelist_items = template.env['product.pricelist.item'].search([
-                    ('product_id', '=', variant.id),
-                    ('daterange_type', '=', 'quarter'),
-                    ('daterange_q', '=', q),
-                    ('daterange_q_year', '=', q_year),
-                ])
-                if len(pricelist_items) > 0:
-                    _logger.info("pricelist item exits for this quarter")
-                else:
-                    margin_max_cost = True
-                    for kv in template.tmpl_all_kvs:
-                        if kv.code == "margin.cost.max":
-                            margin_max_cost = (kv.value_id.code.lower() == 'yes')
-                            break
-                    if margin_max_cost:
-                        if template.standard_price_max > 0:
-                            base_cost = template.standard_price_max
-                        else:
-                            continue  # Skip this variant
+                if (not for_variant) or (for_variant == variant):
+                    _logger.info("Product Template %s (%s), Variant %s (%s)", template.name, template.id, variant.name, variant.id)
+                    pricelist_items = template.env['product.pricelist.item'].search([
+                        ('product_id', '=', variant.id),
+                        ('daterange_type', '=', 'quarter'),
+                        ('daterange_q', '=', q),
+                        ('daterange_q_year', '=', q_year),
+                    ])
+                    if len(pricelist_items) > 0:
+                        _logger.info("pricelist item exits for this quarter")
                     else:
-                        if variant.standard_price > 0:
-                            base_cost = variant.standard_price
+                        margin_max_cost = True
+                        for kv in template.tmpl_all_kvs:
+                            if kv.code == "margin.cost.max":
+                                margin_max_cost = (kv.value_id.code.lower() == 'yes')
+                                break
+                        if margin_max_cost:
+                            if template.standard_price_max > 0:
+                                base_cost = template.standard_price_max
+                            else:
+                                continue  # Skip this variant
                         else:
-                            continue  # Skip this variant
-                    vals = self.get_pricelist_item_vals(template, variant, profit_margin, quarter, multiplier, pricelist, reduce_price)
-                    if fixed_price:
-                        vals['fixed_price'] = fixed_price
-                    if vals:
-                        pricelist_item = template.env['product.pricelist.item'].create(vals)
-                        pricelist_item._calculate_daterange()
-                        
+                            if variant.standard_price > 0:
+                                base_cost = variant.standard_price
+                            else:
+                                continue  # Skip this variant
+                        vals = self.get_pricelist_item_vals(template, variant, profit_margin, quarter, multiplier, pricelist, reduce_price)
+                        if fixed_price:
+                            vals['fixed_price'] = fixed_price
+                        if vals:
+                            pricelist_item = template.env['product.pricelist.item'].create(vals)
+                            pricelist_item._calculate_daterange()

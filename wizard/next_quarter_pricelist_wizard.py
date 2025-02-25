@@ -2,6 +2,7 @@ import logging
 from dateutil.relativedelta import relativedelta
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError
+from odoo.tools import float_compare
 
 _logger = logging.getLogger(__name__)
 
@@ -21,7 +22,10 @@ class NextQuarterPricelistWizardLine(models.TransientModel):
          ('same', 'Same'),
     ], string="Price Change")
     margin_used = fields.Char(string="Margin Used")
-    applied_on = fields.Char(string="Price Type")
+    applied_on = fields.Selection([
+        ('template', 'Template'),
+        ('variant', 'Variant'),
+    ], string="Applied On", default='variant')
 
 class NextQuarterPricelistWizard(models.TransientModel):
     _name = 'next.quarter.pricelist.wizard'
@@ -73,9 +77,9 @@ class NextQuarterPricelistWizard(models.TransientModel):
             calculated_price = vals['fixed_price_automatically_calculated']
 
             # Determine price change
-            if proposed_price > current_price:
+            if float_compare(proposed_price, current_price, precision_digits=2) > 0:
                 change = 'up'
-            elif proposed_price < current_price:
+            elif float_compare(proposed_price, current_price, precision_digits=2) < 0:
                 change = 'down'
             else:
                 change = 'same'
@@ -89,7 +93,7 @@ class NextQuarterPricelistWizard(models.TransientModel):
                 'new_price': proposed_price,  # Initialize new_price
                 'price_change': change,
                 'margin_used': str(tmpl._get_profit_margin()),
-                'applied_on': "Variant" if item.product_id else "Template",
+                'applied_on': "variant" if item.product_id else "template",
             })
         return {
             'type': 'ir.actions.act_window',
@@ -103,14 +107,17 @@ class NextQuarterPricelistWizard(models.TransientModel):
         if not self.line_ids:
             raise UserError(_("No data loaded."))
         for line in self.line_ids:
-            tmpl = line.product_tmpl_id
-            tmpl.create_new_pricelist_item(
-                profit_margin=False,
-                multiplier=2.0,
-                quarter='next',
-                force_create=True,
-                pricelist=self.pricelist_id,
-                reduce_price=False,  # Always False, user chooses on wizard
-                fixed_price=line.new_price
-            )
+            if line.applied_on == 'template':
+                target = line.product_tmpl_id
+            else:
+                target = line.product_tmpl_id.product_variant_ids[:1]
+            if target:
+                target.create_new_pricelist_item(
+                    profit_margin=False,
+                    multiplier=2.0,
+                    quarter='next',
+                    pricelist=self.pricelist_id,
+                    reduce_price=False,  # Always False, user chooses on wizard
+                    fixed_price=line.new_price
+                )
         return {'type': 'ir.actions.act_window_close'}
