@@ -13,6 +13,7 @@ class NextQuarterPricelistWizardLine(models.TransientModel):
     product_tmpl_id = fields.Many2one('product.template', string="Product")
     current_price = fields.Float(string="Current Pricelist Price")
     proposed_price = fields.Float(string="Proposed Price")
+    calculated_price = fields.Float(string="Calculated Price")  # New field
     price_change = fields.Selection([
          ('up', 'Up'),
          ('down', 'Down'),
@@ -51,20 +52,23 @@ class NextQuarterPricelistWizard(models.TransientModel):
             ('daterange_q', '=', current_quarter),
             ('daterange_q_year', '=', year),
         ])
+        _logger.info("Found %s pricelist items", len(pricelist_items))
+
         for item in pricelist_items:
             tmpl = item.product_tmpl_id
             current_price = item.fixed_price
-            previous_price = self.pricelist_id._get_product_price(item.product_id or tmpl, 1.0, date=start_date)
             # Calculate proposed price for next quarter using existing method
-
-            proposed_price = tmpl.create_new_pricelist_item(
+            vals = tmpl.get_pricelist_item_vals(
+                template=tmpl,
+                variant=item.product_id or False,
                 profit_margin=False,
-                multiplier=2.0,
                 quarter='next',
-                force_create=False,
+                multiplier=2.0,
                 pricelist=self.pricelist_id,
                 reduce_price=item.reduce_price  # Pass the reduce_price flag
-            ).fixed_price
+            )
+            proposed_price = vals['fixed_price']
+            calculated_price = vals['fixed_price_automatically_calculated']
 
             # Determine price change
             if proposed_price > current_price:
@@ -74,17 +78,14 @@ class NextQuarterPricelistWizard(models.TransientModel):
             else:
                 change = 'same'
 
-            # Apply reduce_price logic
-            if proposed_price < previous_price and not item.reduce_price:
-                proposed_price = previous_price
-
             self.env['next.quarter.pricelist.wizard.line'].create({
                 'wizard_id': self.id,
                 'product_tmpl_id': tmpl.id,
                 'current_price': current_price,
                 'proposed_price': proposed_price,
+                'calculated_price': calculated_price,
                 'price_change': change,
-                'reduce_price': item.reduce_price,
+                'reduce_price': item.reduce_price if hasattr(item, 'reduce_price') else False, # Handle potential missing attribute
                 'margin_used': tmpl.property_key_margin.name if tmpl.property_key_margin else '',
                 'applied_on': "Variant" if item.product_id else "Template",
             })

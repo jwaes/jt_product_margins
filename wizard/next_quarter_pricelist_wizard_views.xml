@@ -14,6 +14,7 @@
                             <field name="product_tmpl_id"/>
                             <field name="current_price"/>
                             <field name="proposed_price"/>
+                            <field name="calculated_price"/>
                             <field name="price_change"/>
                             <field name="reduce_price"/>
                             <field name="margin_used"/>

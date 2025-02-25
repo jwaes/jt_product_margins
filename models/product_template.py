@@ -78,25 +78,80 @@ class ProductTemplate(models.Model):
                     profit_margin = float(kv.text)
         return profit_margin        
 
-    def create_new_pricelist_item(self, profit_margin=False, multiplier=2.0, quarter='this', force_create=False, pricelist=False, reduce_price=False):
+    def get_pricelist_item_vals(self, template, variant, profit_margin=False,  quarter='this', multiplier=2.0, pricelist=False, reduce_price=False):
         if not pricelist:
             pricelist = self.env['product.pricelist.item']._default_pricelist_id()
-
-        today = fields.Datetime.now()
-        previous_date =  tools.date_utils.subtract(today, months=3)        
-
-        # quarter == 'this'
-        q = self._get_q()
-        q_year = self._get_q_year()
 
         if not profit_margin:
             profit_margin = self._get_profit_margin()
 
+        q, q_year, previous_date = self.get_q_year(quarter)            
+                    
+        margin_max_cost = True
+        for kv in template.tmpl_all_kvs:
+            if kv.code == "margin.cost.max":
+                margin_max_cost = (kv.value_id.code.lower() == 'yes')
+                break
+        _logger.info("Margin max cost setting evaluated to: %s", margin_max_cost)
+        if margin_max_cost:
+            _logger.info("Margin max cost is enabled. Using template cost for margin calculation.")
+            if template.standard_price_max > 0:
+                base_cost = template.standard_price_max
+            else:
+                continue
+        else:
+            _logger.info("Margin max cost is disabled. Using variant cost for margin calculation.")
+            if variant.standard_price > 0:
+                base_cost = variant.standard_price
+            else:
+                continue
+        sales_price = (base_cost / (1 - profit_margin)) * multiplier
+        previous_price = pricelist._get_product_price(variant, 1.0, date=previous_date)
+        _logger.info("calculated price is %s", sales_price)
+        calculated_price = sales_price
+        if sales_price < previous_price:
+            _logger.info("calculated price is lower than current pricelist price")
+            if not reduce_price:
+                _logger.info("not lowering price")
+                sales_price = previous_price
+        
+        vals = {
+            'pricelist_id': pricelist.id,
+            'applied_on': '0_product_variant',
+            'product_id': variant.id,
+            'product_tmpl_id': template.id,
+            'compute_price': 'fixed',
+            'fixed_price': sales_price,
+            'fixed_price_automatically_calculated': calculated_price,
+            'base': 'list_price',
+            'min_quantity': 0.0,
+            'daterange_type': 'quarter',
+            'daterange_q': q,
+            'daterange_q_year': q_year,
+            'automatically_generated': True,
+        }
+        return vals
+
+    def get_q_year(self, quarter='this'):
+        today = fields.Datetime.now()
+        previous_date =  tools.date_utils.subtract(today, months=3)        
+        
+        # quarter == 'this'
+        q = self._get_q()
+        q_year = self._get_q_year()
+        
         if quarter == 'next':
             for_date = tools.date_utils.add(today, months=3)
             previous_date =  today
             q = self._get_q(for_date=for_date)
             q_year = self._get_q_year(for_date=for_date)
+        return q, q_year, previous_date
+
+    def create_new_pricelist_item(self, profit_margin=False, multiplier=2.0, quarter='this', force_create=False, pricelist=False, reduce_price=False):
+        if not pricelist:
+            pricelist = self.env['product.pricelist.item']._default_pricelist_id()
+
+        q, q_year, previous_date = self.get_q_year(quarter)
 
         for template in self:
             for variant in template.product_variant_ids:
@@ -110,46 +165,6 @@ class ProductTemplate(models.Model):
                 if len(pricelist_items) > 0:
                     _logger.info("pricelist item exits for this quarter")
                 else:
-                    margin_max_cost = True
-                    for kv in template.tmpl_all_kvs:
-                        if kv.code == "margin.cost.max":
-                            margin_max_cost = (kv.value_id.code.lower() == 'yes')
-                            break
-                    _logger.info("Margin max cost setting evaluated to: %s", margin_max_cost)
-                    if margin_max_cost:
-                        _logger.info("Margin max cost is enabled. Using template cost for margin calculation.")
-                        if template.standard_price_max > 0:
-                            base_cost = template.standard_price_max
-                        else:
-                            continue
-                    else:
-                        _logger.info("Margin max cost is disabled. Using variant cost for margin calculation.")
-                        if variant.standard_price > 0:
-                            base_cost = variant.standard_price
-                        else:
-                            continue
-                    sales_price = (base_cost / (1 - profit_margin)) * multiplier
-                    previous_price = pricelist._get_product_price(variant, 1.0, date=previous_date)
-                    _logger.info("calculated price is %s", sales_price)
-                    calculated_price = sales_price
-                    if sales_price < previous_price:
-                        _logger.info("calculated price is lower than current pricelist price")
-                        if not reduce_price:
-                            _logger.info("not lowering price")
-                            sales_price = previous_price
-                    pricelist_item = template.env['product.pricelist.item'].create({
-                        'pricelist_id': pricelist.id,
-                        'applied_on': '0_product_variant',
-                        'product_id': variant.id,
-                        'product_tmpl_id': template.id,
-                        'compute_price': 'fixed',
-                        'fixed_price': sales_price,
-                        'fixed_price_automatically_calculated': calculated_price,
-                        'base': 'list_price',
-                        'min_quantity': 0.0,
-                        'daterange_type': 'quarter',
-                        'daterange_q': q,
-                        'daterange_q_year': q_year,
-                        'automatically_generated': True,
-                    })
+                    vals = self.get_pricelist_item_vals(template, variant, profit_margin, quarter, multiplier, pricelist, reduce_price)
+                    pricelist_item = template.env['product.pricelist.item'].create(vals)
                     pricelist_item._calculate_daterange()
