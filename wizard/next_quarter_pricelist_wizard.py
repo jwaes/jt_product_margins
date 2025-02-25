@@ -13,8 +13,8 @@ class NextQuarterPricelistWizardLine(models.TransientModel):
     product_tmpl_id = fields.Many2one('product.template', string="Product")
     current_price = fields.Float(string="Current Pricelist Price")
     proposed_price = fields.Float(string="Proposed Price")
-    calculated_price = fields.Float(string="Calculated Price")
-    new_price = fields.Float(string="New Price")  # New field
+    calculated_price = fields.Float(string="Calculated Price")  # New field
+    new_price = fields.Float(string="New Price") # Added field
     price_change = fields.Selection([
          ('up', 'Up'),
          ('down', 'Down'),
@@ -57,10 +57,12 @@ class NextQuarterPricelistWizard(models.TransientModel):
         for item in pricelist_items:
             tmpl = item.product_tmpl_id
             current_price = item.fixed_price
+            # Use the template if product_id is False, otherwise use variant.
+            product_to_use = item.product_id or tmpl
             # Calculate proposed price for next quarter using existing method
             vals = tmpl.get_pricelist_item_vals(
                 template=tmpl,
-                variant=item.product_id or False,
+                variant=product_to_use,
                 profit_margin=False,
                 quarter='next',
                 multiplier=2.0,
@@ -108,7 +110,7 @@ class NextQuarterPricelistWizard(models.TransientModel):
                 quarter='next',
                 force_create=True,
                 pricelist=self.pricelist_id,
-                reduce_price=False,  # Always create with calculated price
-                fixed_price=line.new_price # Pass the new price
+                reduce_price=False,  # Always False, user chooses on wizard
+                fixed_price=line.new_price
             )
         return {'type': 'ir.actions.act_window_close'}

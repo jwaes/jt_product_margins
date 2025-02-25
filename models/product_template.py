@@ -106,7 +106,7 @@ class ProductTemplate(models.Model):
             else:
                 return False  # No vals if no base cost
         sales_price = (base_cost / (1 - profit_margin)) * multiplier
-        previous_price = pricelist._get_product_price(variant, 1.0, date=previous_date)
+        previous_price = pricelist._get_product_price(variant or template, 1.0, date=previous_date)
         _logger.info("calculated price is %s", sales_price)
         calculated_price = sales_price
         if sales_price < previous_price:
