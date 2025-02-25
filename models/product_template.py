@@ -98,13 +98,13 @@ class ProductTemplate(models.Model):
             if template.standard_price_max > 0:
                 base_cost = template.standard_price_max
             else:
-                return False # No vals if no base cost
+                return False  # No vals if no base cost
         else:
             _logger.info("Margin max cost is disabled. Using variant cost for margin calculation.")
             if variant.standard_price > 0:
                 base_cost = variant.standard_price
             else:
-                return False # No vals if no base cost
+                return False  # No vals if no base cost
         sales_price = (base_cost / (1 - profit_margin)) * multiplier
         previous_price = pricelist._get_product_price(variant, 1.0, date=previous_date)
         _logger.info("calculated price is %s", sales_price)
@@ -174,12 +174,12 @@ class ProductTemplate(models.Model):
                         if template.standard_price_max > 0:
                             base_cost = template.standard_price_max
                         else:
-                            continue # Skip this variant
+                            continue  # Skip this variant
                     else:
                         if variant.standard_price > 0:
                             base_cost = variant.standard_price
                         else:
-                            continue # Skip this variant
+                            continue  # Skip this variant
                     vals = self.get_pricelist_item_vals(template, variant, profit_margin, quarter, multiplier, pricelist, reduce_price)
                     if vals:
                         pricelist_item = template.env['product.pricelist.item'].create(vals)
