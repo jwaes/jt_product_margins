@@ -26,6 +26,22 @@ class NextQuarterPricelistWizardLine(models.TransientModel):
         ('template', 'Template'),
         ('variant', 'Variant'),
     ], string="Applied On", default='variant')
+    computed_margin = fields.Float(string="Computed Margin", compute="_compute_margin")
+
+    @api.depends('product_tmpl_id', 'proposed_price', 'new_price', 'applied_on')
+    def _compute_margin(self):
+        for line in self:
+            if line.applied_on == 'variant':
+                cost_price = line.product_tmpl_id.product_variant_ids[:1].standard_price if line.product_tmpl_id.product_variant_ids else 0.0
+            else:
+                cost_price = line.product_tmpl_id.standard_price_max
+
+            sales_price = line.new_price if line.new_price else line.proposed_price
+            if sales_price > 0.0 and cost_price > 0.0:
+                gross_profit = sales_price - cost_price
+                line.computed_margin = gross_profit / sales_price
+            else:
+                line.computed_margin = 0.0
 
 class NextQuarterPricelistWizard(models.TransientModel):
     _name = 'next.quarter.pricelist.wizard'
@@ -111,18 +127,14 @@ class NextQuarterPricelistWizard(models.TransientModel):
                 target = line.product_tmpl_id
             else:
                 target = line.product_tmpl_id.product_variant_ids[:1]
-                if not target:
-                    continue # Skip if no variant is found.
-
-            if target:  # Check if target exists
+            if target:
                 target.create_new_pricelist_item(
                     profit_margin=False,
                     multiplier=2.0,
                     quarter='next',
                     force_create=True,
                     pricelist=self.pricelist_id,
-                    reduce_price=False,  # Always False
-                    fixed_price=line.new_price,
-                    for_variant=target if line.applied_on == 'variant' else False  # Pass the variant if applicable
+                    reduce_price=False,  # Always False, user chooses on wizard
+                    fixed_price=line.new_price
                 )
         return {'type': 'ir.actions.act_window_close'}
