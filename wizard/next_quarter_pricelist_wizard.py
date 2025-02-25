@@ -19,7 +19,7 @@ class NextQuarterPricelistWizardLine(models.TransientModel):
          ('down', 'Down'),
          ('same', 'Same'),
     ], string="Price Change")
-    reduce_price = fields.Boolean(string="Reduce Price Applied")
+    apply_reduction = fields.Boolean(string="Apply Reduction", default=False) # New Field
     margin_used = fields.Char(string="Margin Used")
     applied_on = fields.Char(string="Price Type")
 
@@ -65,7 +65,7 @@ class NextQuarterPricelistWizard(models.TransientModel):
                 quarter='next',
                 multiplier=2.0,
                 pricelist=self.pricelist_id,
-                reduce_price=item.reduce_price  # Pass the reduce_price flag
+                reduce_price=False  # We're not applying reduction yet
             )
             proposed_price = vals['fixed_price']
             calculated_price = vals['fixed_price_automatically_calculated']
@@ -85,7 +85,7 @@ class NextQuarterPricelistWizard(models.TransientModel):
                 'proposed_price': proposed_price,
                 'calculated_price': calculated_price,
                 'price_change': change,
-                'reduce_price': item.reduce_price if hasattr(item, 'reduce_price') else False, # Handle potential missing attribute
+                'apply_reduction': False, #default to false
                 'margin_used': tmpl.property_key_margin.name if tmpl.property_key_margin else '',
                 'applied_on': "Variant" if item.product_id else "Template",
             })
@@ -108,6 +108,6 @@ class NextQuarterPricelistWizard(models.TransientModel):
                 quarter='next',
                 force_create=True,
                 pricelist=self.pricelist_id,
-                reduce_price=line.reduce_price
+                reduce_price=line.apply_reduction  # Use the user's choice
             )
         return {'type': 'ir.actions.act_window_close'}

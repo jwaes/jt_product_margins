@@ -16,7 +16,7 @@
                             <field name="proposed_price"/>
                             <field name="calculated_price"/>
                             <field name="price_change"/>
-                            <field name="reduce_price"/>
+                            <field name="apply_reduction"/>
                             <field name="margin_used"/>
                             <field name="applied_on" string="Price Type"/>
                         </list>
