@@ -10,14 +10,13 @@
                 </group>
                 <sheet>
                     <field name="line_ids" nolabel="1">
-                        <list decoration-success="price_change=='up'" decoration-danger="price_change=='down'" editable="bottom">
+                        <list decoration-info="price_change=='up'" decoration-danger="price_change=='down'" editable="bottom">
                             <field name="product_tmpl_id" invisible="product_id"/>
                             <field name="product_id" invisible="not product_id"/>
-                            <field name="current_price"/>
-                            <field name="proposed_price"/>
-                            <field name="calculated_price"/>
-                            <field name="price_change"/>
-                            <field name="new_price"/>
+                            <field name="current_price" string="Current"/>
+                            <field name="calculated_price" string="Calculated"/>
+                            <field name="price_change" string="Change"/>
+                            <field name="new_price" string="New"/>
                             <field name="computed_margin"/>
                             <field name="applied_on" string="Price Type"/>
                         </list>

@@ -22,7 +22,7 @@ class NextQuarterPricelistWizardLine(models.TransientModel):
          ('up', 'Up'),
          ('down', 'Down'),
          ('same', 'Same'),
-    ], string="Price Change", compute='_compute_price_change')
+    ], string="Price Change", compute='_compute_price_change', store=True)
     margin_used = fields.Char(string="Margin Used")
     applied_on = fields.Selection([
         ('template', 'Template'),
