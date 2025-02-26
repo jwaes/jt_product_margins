@@ -195,14 +195,25 @@ class ProductTemplate(models.Model):
 
         q, q_year, previous_date = self.get_q_year(quarter)
 
+        margin_max_cost = True
+        for kv in template.tmpl_all_kvs:
+            if kv.code == "margin.cost.max":
+                margin_max_cost = (kv.value_id.code.lower() == 'yes')
+                break
+
         if variant:
             _logger.info("Variant %s (%s)", variant.name, variant.id)
             pricelist_item = self.create_new_pricelist_item_variant(variant, variant.product_tmpl_id, q, q_year, profit_margin, quarter, multiplier, pricelist, reduce_price, fixed_price)
         else:
             for template in self:
                 _logger.info("Product Template %s (%s)", template.name, template.id)
-                for variant in template.product_variant_ids:
-                    _logger.info("|-- Variant %s (%s)", variant.name, variant.id)
-                    pricelist_item = self.create_new_pricelist_item_variant(variant, template, q, q_year, profit_margin, quarter, multiplier, pricelist, reduce_price, fixed_price)
+                if margin_max_cost:
+                    _logger.info("Margin max cost is enabled. Using template cost for margin calculation.")
+                    pricelist_item = self.create_new_pricelist_item_variant(None, template, q, q_year, profit_margin, quarter, multiplier, pricelist, reduce_price, fixed_price)
+                else :
+                    _logger.info("Margin max cost is disabled. Using variant cost for margin calculation.")
+                    for variant in template.product_variant_ids:
+                        _logger.info("|-- Variant %s (%s)", variant.name, variant.id)
+                        pricelist_item = self.create_new_pricelist_item_variant(variant, template, q, q_year, profit_margin, quarter, multiplier, pricelist, reduce_price, fixed_price)
 
 
