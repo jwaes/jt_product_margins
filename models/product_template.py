@@ -155,9 +155,9 @@ class ProductTemplate(models.Model):
             ('daterange_q_year', '=', q_year),
         ]
         if variant:
-            domain.append(('product_id', '=', variant))
+            domain.append(('product_id', '=', variant.id))
         else:
-            domain.append(('product_tmpl_id', '=', template))
+            domain.append(('product_tmpl_id', '=', template.id))
 
         _logger.info("searching for pricelist items with domain: %s", domain)
         pricelist_items = template.env['product.pricelist.item'].search(domain)
@@ -196,6 +196,7 @@ class ProductTemplate(models.Model):
         q, q_year, previous_date = self.get_q_year(quarter)
 
         if variant:
+            _logger.info("Variant %s (%s)", variant.name, variant.id)
             pricelist_item = self.create_new_pricelist_item_variant(variant, variant.product_tmpl_id, q, q_year, profit_margin, quarter, multiplier, pricelist, reduce_price, fixed_price)
         else:
             for template in self:
