@@ -174,12 +174,12 @@ class ProductTemplate(models.Model):
                     variant = False  # Use template cost, and make a template price entry
                 else:
                     _logger.warning("not creating a standard_price_max is 0.0")            
-                    continue  # Skip this variant
+                    # return  # Skip this variant
             else:
                 if variant.standard_price > 0:
                     base_cost = variant.standard_price
-                else:
-                    continue  # Skip this variant
+                # else:
+                    # return  # Skip this variant
             vals = self.get_pricelist_item_vals(template, variant, profit_margin, quarter, multiplier, pricelist, reduce_price)
             if fixed_price:
                 vals['fixed_price'] = fixed_price
