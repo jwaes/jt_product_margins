@@ -38,7 +38,7 @@ class NextQuarterPricelistWizardLine(models.TransientModel):
             else:
                 cost_price = line.product_tmpl_id.standard_price_max
 
-            sales_price = line.new_price if line.new_price else line.proposed_price
+            sales_price = (line.new_price if line.new_price else line.proposed_price) / 2.0
             if sales_price > 0.0 and cost_price > 0.0:
                 gross_profit = sales_price - cost_price
                 line.computed_margin = gross_profit / sales_price
@@ -63,6 +63,7 @@ class NextQuarterPricelistWizard(models.TransientModel):
     line_ids = fields.One2many('next.quarter.pricelist.wizard.line', 'wizard_id', string="Products")
 
     def load_data(self):
+       # Clear existing lines
         self.line_ids.unlink()
         today = fields.Date.today()
         current_quarter = (today.month - 1) // 3 + 1
@@ -74,48 +75,6 @@ class NextQuarterPricelistWizard(models.TransientModel):
         if next_quarter > 4:
             next_quarter = 1
             next_year += 1
-
-        # # Subquery to find pricelist items in the *next* quarter
-        # next_quarter_items = self.env['product.pricelist.item'].search([
-        #     ('pricelist_id', '=', self.pricelist_id.id),
-        #     ('daterange_type', '=', 'quarter'),
-        #     ('daterange_q', '=', next_quarter),
-        #     ('daterange_q_year', '=', next_year),
-        # ]).ids  # Get IDs of all next quarter items
-        start_time1 = time.perf_counter()
-        # Main query to find current quarter items, excluding those with a corresponding next quarter item
-        pricelist_items = self.env['product.pricelist.item'].search([
-            ('pricelist_id', '=', self.pricelist_id.id),
-            ('automatically_generated', '=', True),
-            ('daterange_type', '=', 'quarter'),
-            ('daterange_q', '=', current_quarter),
-            ('daterange_q_year', '=', year),
-            ('id', 'not in', [item.id for item in self.env['product.pricelist.item'].search([
-                ('pricelist_id', '=', self.pricelist_id.id),
-                ('daterange_type', '=', 'quarter'),
-                ('daterange_q', '=', next_quarter),
-                ('daterange_q_year', '=', next_year),
-                '|',
-                '&', ('product_id', '!=', False), ('product_id', 'in', self.env['product.pricelist.item'].search([
-                    ('pricelist_id', '=', self.pricelist_id.id),            
-                    ('automatically_generated', '=', True),
-                    ('daterange_type', '=', 'quarter'),
-                    ('daterange_q', '=', current_quarter),
-                    ('daterange_q_year', '=', year),
-                    ('product_id', '!=', False)]).mapped('product_id').ids),
-                '&', ('product_tmpl_id', '!=', False),('product_id', '=', False), ('product_tmpl_id', 'in', self.env['product.pricelist.item'].search([
-                    ('pricelist_id', '=', self.pricelist_id.id),            
-                    ('automatically_generated', '=', True),
-                    ('daterange_type', '=', 'quarter'),
-                    ('daterange_q', '=', current_quarter),
-                    ('daterange_q_year', '=', year),
-                    ('product_tmpl_id', '!=', False),('product_id', '=', False)]).mapped('product_tmpl_id').ids)
-            ])
-            ])
-        ])
-        elapsed_time = time.perf_counter() - start_time1
-        print(f"Elapsed time: {elapsed_time:.4f} seconds")
-        _logger.info("Found %s pricelist items", len(pricelist_items))
 
         start_time2 = time.perf_counter()
         # Step 1: Get current quarter items
@@ -158,10 +117,8 @@ class NextQuarterPricelistWizard(models.TransientModel):
         pricelist_items = current_items.filtered(keep_item)
 
         elapsed_time = time.perf_counter() - start_time2
-        print(f"Elapsed time: {elapsed_time:.4f} seconds")
+        _logger.info(f"Elapsed time: {elapsed_time:.4f} seconds")
         _logger.info("Found %s pricelist items", len(pricelist_items))
-
-
 
 
         for item in pricelist_items:

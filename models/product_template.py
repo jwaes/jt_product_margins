@@ -101,7 +101,7 @@ class ProductTemplate(models.Model):
                 return False  # No vals if no base cost
         else:
             _logger.info("Margin max cost is disabled. Using variant cost for margin calculation.")
-            if variant.standard_price > 0:
+            if variant and variant.standard_price > 0:
                 base_cost = variant.standard_price
             else:
                 return False  # No vals if no base cost
@@ -117,8 +117,8 @@ class ProductTemplate(models.Model):
         
         vals = {
             'pricelist_id': pricelist.id,
-            'applied_on': '0_product_variant',
-            'product_id': variant.id,
+            'applied_on': '0_product_variant' if variant else '1_product',
+            'product_id': variant.id if variant else False,
             'product_tmpl_id': template.id,
             'compute_price': 'fixed',
             'fixed_price': sales_price,
@@ -174,6 +174,7 @@ class ProductTemplate(models.Model):
                         if margin_max_cost:
                             if template.standard_price_max > 0:
                                 base_cost = template.standard_price_max
+                                variant = False  # Use template cost, and make a template price entry
                             else:
                                 _logger.warning("not creating a standard_price_max is 0.0")            
                                 continue  # Skip this variant
