@@ -148,7 +148,6 @@ class ProductTemplate(models.Model):
         return q, q_year, previous_date
 
     def create_new_pricelist_item_variant(self, variant, template, q, q_year, profit_margin, quarter, multiplier, pricelist, reduce_price, fixed_price):
-        _logger.info("Product Template %s (%s), Variant %s (%s)", template.name, template.id, variant.name, variant.id)
         domain = [
             ('daterange_type', '=', 'quarter'),
             ('daterange_q', '=', q),
