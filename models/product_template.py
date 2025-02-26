@@ -175,6 +175,7 @@ class ProductTemplate(models.Model):
                             if template.standard_price_max > 0:
                                 base_cost = template.standard_price_max
                             else:
+                                _logger.warning("not creating a standard_price_max is 0.0")            
                                 continue  # Skip this variant
                         else:
                             if variant.standard_price > 0:
