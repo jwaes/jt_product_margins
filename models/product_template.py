@@ -194,7 +194,7 @@ class ProductTemplate(models.Model):
         q, q_year, previous_date = self.get_q_year(quarter)
 
         if variant:
-            pricelist_item = self.jls_extract_def(variant, template, q, q_year, profit_margin, quarter, multiplier, pricelist, reduce_price, fixed_price)
+            pricelist_item = self.jls_extract_def(variant, variant.product_tmpl_id, q, q_year, profit_margin, quarter, multiplier, pricelist, reduce_price, fixed_price)
         else:
             for template in self:
                 _logger.info("Product Template %s (%s)", template.name, template.id)
