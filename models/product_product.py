@@ -67,11 +67,11 @@ class ProductProduct(models.Model):
         """
         self.ensure_one()
         return self.product_tmpl_id.create_new_pricelist_item(
+            variant=self,
             profit_margin=profit_margin,
             multiplier=multiplier,
             quarter=quarter,
             pricelist=pricelist,
             reduce_price=reduce_price,
             fixed_price=fixed_price,
-            for_variant=self,
         )    

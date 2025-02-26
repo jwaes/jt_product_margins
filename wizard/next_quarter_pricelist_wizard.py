@@ -28,7 +28,7 @@ class NextQuarterPricelistWizardLine(models.TransientModel):
         ('template', 'Template'),
         ('variant', 'Variant'),
     ], string="Applied On", default='variant')
-    computed_margin = fields.Float(string="Computed Margin", compute="_compute_margin")
+    computed_margin = fields.Float(string="Computed Margin", compute="_compute_margin", store=True)
 
     @api.depends('product_tmpl_id', 'proposed_price', 'new_price', 'applied_on')
     def _compute_margin(self):
