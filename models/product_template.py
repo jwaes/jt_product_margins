@@ -196,7 +196,7 @@ class ProductTemplate(models.Model):
         q, q_year, previous_date = self.get_q_year(quarter)
 
         margin_max_cost = True
-        for kv in template.tmpl_all_kvs:
+        for kv in self.tmpl_all_kvs:
             if kv.code == "margin.cost.max":
                 margin_max_cost = (kv.value_id.code.lower() == 'yes')
                 break
