@@ -3,6 +3,7 @@ from dateutil.relativedelta import relativedelta
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError
 from odoo.tools import float_compare
+import time
 
 _logger = logging.getLogger(__name__)
 
@@ -62,28 +63,106 @@ class NextQuarterPricelistWizard(models.TransientModel):
     line_ids = fields.One2many('next.quarter.pricelist.wizard.line', 'wizard_id', string="Products")
 
     def load_data(self):
-        # Clear existing lines
         self.line_ids.unlink()
         today = fields.Date.today()
         current_quarter = (today.month - 1) // 3 + 1
         year = today.year
-        # Calculate start and end dates for current quarter
-        start_date = fields.Date.from_string(f'{year}-{(3 * current_quarter - 2):02d}-01')
-        if current_quarter == 4:
-            end_date = fields.Date.from_string(f'{year}-12-31')
-        else:
-            next_quarter_start = fields.Date.from_string(f'{year}-{(3 * current_quarter + 1):02d}-01')
-            end_date = next_quarter_start + relativedelta(days=-1)
-        _logger.info("Current Quarter Dates: %s to %s", start_date, end_date)
-        # Find pricelist items automatically generated for current quarter
+
+        # Calculate next quarter and year
+        next_quarter = current_quarter + 1
+        next_year = year
+        if next_quarter > 4:
+            next_quarter = 1
+            next_year += 1
+
+        # # Subquery to find pricelist items in the *next* quarter
+        # next_quarter_items = self.env['product.pricelist.item'].search([
+        #     ('pricelist_id', '=', self.pricelist_id.id),
+        #     ('daterange_type', '=', 'quarter'),
+        #     ('daterange_q', '=', next_quarter),
+        #     ('daterange_q_year', '=', next_year),
+        # ]).ids  # Get IDs of all next quarter items
+        start_time1 = time.perf_counter()
+        # Main query to find current quarter items, excluding those with a corresponding next quarter item
         pricelist_items = self.env['product.pricelist.item'].search([
-            ('pricelist_id', '=', self.pricelist_id.id),            
+            ('pricelist_id', '=', self.pricelist_id.id),
+            ('automatically_generated', '=', True),
+            ('daterange_type', '=', 'quarter'),
+            ('daterange_q', '=', current_quarter),
+            ('daterange_q_year', '=', year),
+            ('id', 'not in', [item.id for item in self.env['product.pricelist.item'].search([
+                ('pricelist_id', '=', self.pricelist_id.id),
+                ('daterange_type', '=', 'quarter'),
+                ('daterange_q', '=', next_quarter),
+                ('daterange_q_year', '=', next_year),
+                '|',
+                '&', ('product_id', '!=', False), ('product_id', 'in', self.env['product.pricelist.item'].search([
+                    ('pricelist_id', '=', self.pricelist_id.id),            
+                    ('automatically_generated', '=', True),
+                    ('daterange_type', '=', 'quarter'),
+                    ('daterange_q', '=', current_quarter),
+                    ('daterange_q_year', '=', year),
+                    ('product_id', '!=', False)]).mapped('product_id').ids),
+                '&', ('product_tmpl_id', '!=', False),('product_id', '=', False), ('product_tmpl_id', 'in', self.env['product.pricelist.item'].search([
+                    ('pricelist_id', '=', self.pricelist_id.id),            
+                    ('automatically_generated', '=', True),
+                    ('daterange_type', '=', 'quarter'),
+                    ('daterange_q', '=', current_quarter),
+                    ('daterange_q_year', '=', year),
+                    ('product_tmpl_id', '!=', False),('product_id', '=', False)]).mapped('product_tmpl_id').ids)
+            ])
+            ])
+        ])
+        elapsed_time = time.perf_counter() - start_time1
+        print(f"Elapsed time: {elapsed_time:.4f} seconds")
+        _logger.info("Found %s pricelist items", len(pricelist_items))
+
+        start_time2 = time.perf_counter()
+        # Step 1: Get current quarter items
+        current_items = self.env['product.pricelist.item'].search([
+            ('pricelist_id', '=', self.pricelist_id.id),
             ('automatically_generated', '=', True),
             ('daterange_type', '=', 'quarter'),
             ('daterange_q', '=', current_quarter),
             ('daterange_q_year', '=', year),
         ])
+
+        # Step 2: Get related product and product template IDs from current items.
+        # Only consider product_ids when available; if not, use product_tmpl_id.
+        current_product_ids = current_items.filtered(lambda r: r.product_id).mapped('product_id').ids
+        current_product_tmpl_ids = current_items.filtered(lambda r: not r.product_id and r.product_tmpl_id).mapped('product_tmpl_id').ids
+
+        # Step 3: Find next quarter items that use any of these products/templates
+        next_items = self.env['product.pricelist.item'].search([
+            ('pricelist_id', '=', self.pricelist_id.id),
+            ('daterange_type', '=', 'quarter'),
+            ('daterange_q', '=', next_quarter),
+            ('daterange_q_year', '=', next_year),
+            '|',
+            ('product_id', 'in', current_product_ids),
+            ('product_tmpl_id', 'in', current_product_tmpl_ids),
+        ])
+
+        # Build sets of product IDs and product template IDs present in next quarter items
+        next_product_ids = next_items.filtered(lambda r: r.product_id).mapped('product_id').ids
+        next_product_tmpl_ids = next_items.filtered(lambda r: not r.product_id and r.product_tmpl_id).mapped('product_tmpl_id').ids
+
+        # Step 4: Exclude current items that have a corresponding next quarter entry.
+        def keep_item(item):
+            if item.product_id:
+                return item.product_id.id not in next_product_ids
+            elif item.product_tmpl_id:
+                return item.product_tmpl_id.id not in next_product_tmpl_ids
+            return True
+
+        pricelist_items = current_items.filtered(keep_item)
+
+        elapsed_time = time.perf_counter() - start_time2
+        print(f"Elapsed time: {elapsed_time:.4f} seconds")
         _logger.info("Found %s pricelist items", len(pricelist_items))
+
+
+
 
         for item in pricelist_items:
             tmpl = item.product_tmpl_id
