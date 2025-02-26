@@ -147,7 +147,7 @@ class ProductTemplate(models.Model):
             q_year = self._get_q_year(for_date=for_date)
         return q, q_year, previous_date
 
-    def jls_extract_def(self, variant, template, q, q_year, profit_margin, quarter, multiplier, pricelist, reduce_price, fixed_price):
+    def create_new_pricelist_item_variant(self, variant, template, q, q_year, profit_margin, quarter, multiplier, pricelist, reduce_price, fixed_price):
         _logger.info("Product Template %s (%s), Variant %s (%s)", template.name, template.id, variant.name, variant.id)
         domain = [
             ('daterange_type', '=', 'quarter'),
@@ -155,11 +155,13 @@ class ProductTemplate(models.Model):
             ('daterange_q_year', '=', q_year),
         ]
         if variant:
-            domain.append(('product_id', '=', variant.id))
+            domain.append(('product_id', '=', variant))
         else:
-            domain.append(('product_tmpl_id', '=', template.id))
-        pricelist_items = template.env['product.pricelist.item'].search(domain)
+            domain.append(('product_tmpl_id', '=', template))
 
+        _logger.info("searching for pricelist items with domain: %s", domain)
+        pricelist_items = template.env['product.pricelist.item'].search(domain)
+        _logger.info("pricelist items found: %s", len(pricelist_items))
         if len(pricelist_items) > 0:
             _logger.info("pricelist item exits for this quarter")
         else:
@@ -194,11 +196,12 @@ class ProductTemplate(models.Model):
         q, q_year, previous_date = self.get_q_year(quarter)
 
         if variant:
-            pricelist_item = self.jls_extract_def(variant, variant.product_tmpl_id, q, q_year, profit_margin, quarter, multiplier, pricelist, reduce_price, fixed_price)
+            pricelist_item = self.create_new_pricelist_item_variant(variant, variant.product_tmpl_id, q, q_year, profit_margin, quarter, multiplier, pricelist, reduce_price, fixed_price)
         else:
             for template in self:
                 _logger.info("Product Template %s (%s)", template.name, template.id)
                 for variant in template.product_variant_ids:
                     _logger.info("|-- Variant %s (%s)", variant.name, variant.id)
-                    pricelist_item = self.jls_extract_def(variant, template, q, q_year, profit_margin, quarter, multiplier, pricelist, reduce_price, fixed_price)
+                    pricelist_item = self.create_new_pricelist_item_variant(variant, template, q, q_year, profit_margin, quarter, multiplier, pricelist, reduce_price, fixed_price)
+
 
